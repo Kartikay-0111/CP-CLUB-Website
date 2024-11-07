@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import members from "../../json/members.json";
+import members from "../json/members.json";
 
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -35,6 +35,16 @@ const Leaderboard = () => {
     }
   };
 
+  const getRankColor = (rating) => {
+    if (rating >= 2400) return "bg-red-500 text-white";
+    if (rating >= 2200) return "bg-orange-500 text-white";
+    if (rating >= 1600) return "bg-blue-500 text-white";
+    if (rating >= 1400) return "bg-cyan-500 text-white";
+    if (rating >= 1200) return "bg-green-500 text-white";
+    if (rating >= 0) return "bg-gray-500 text-white";
+    return "bg-gray-500 text-white";
+  };
+
   useEffect(() => {
     const fetchRatings = async () => {
       setLoading(true);
@@ -50,6 +60,17 @@ const Leaderboard = () => {
               maxRating: cfData.maxRating || 0,
               rank: cfData.rank || "N/A",
               maxRank: cfData.maxRank || "N/A",
+              titlePhoto:
+                cfData.titlePhoto ||
+                "https://userpic.codeforces.org/no-title.jpg",
+              rankColor:
+                cfData.rank === "N/A"
+                  ? "bg-red-500 text-white"
+                  : getRankColor(cfData.maxRating || 0),
+              maxRankColor:
+                cfData.maxRank === "N/A"
+                  ? "bg-red-500 text-white"
+                  : getRankColor(cfData.maxRating || 0),
             };
           } else {
             return {
@@ -58,6 +79,9 @@ const Leaderboard = () => {
               maxRating: 0,
               rank: "N/A",
               maxRank: "N/A",
+              titlePhoto: "https://userpic.codeforces.org/no-title.jpg",
+              rankColor: "bg-red-500 text-white",
+              maxRankColor: "bg-red-500 text-white",
             };
           }
         })
@@ -79,9 +103,9 @@ const Leaderboard = () => {
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Leaderboard</h1>
-      <table className="w-full max-w-4xl bg-white shadow-md rounded-lg overflow-hidden">
+      <table className="w-full max-w-100 bg-white shadow-md rounded-lg overflow-hidden">
         <thead>
-          <tr className="bg-blue-500 text-white text-left">
+          <tr className="bg-teal-500 text-white text-left">
             <th className="p-4">Name</th>
             <th className="p-4">Year</th>
             <th className="p-4">LeetCode</th>
@@ -95,7 +119,16 @@ const Leaderboard = () => {
         <tbody>
           {leaderboardData.map((member, index) => (
             <tr key={index} className="border-b hover:bg-gray-100">
-              <td className="p-4 text-gray-800">{member.name}</td>
+              <td className="p-4 text-gray-800">
+                <div className="flex items-center">
+                  <img
+                    src={member.titlePhoto}
+                    alt={member.name}
+                    className="w-10 h-10 rounded-full mr-4"
+                  />
+                  {member.name}
+                </div>
+              </td>
               <td className="p-4 text-gray-600">{member.year}</td>
               <td className="p-4 text-blue-600">
                 <a
@@ -128,8 +161,12 @@ const Leaderboard = () => {
                 </a>
               </td>
               <td className="p-4 text-gray-800">{member.rating}</td>
-              <td className="p-4 text-gray-800 capitalize">{member.rank}</td>
-              <td className="p-4 text-gray-800 capitalize">{member.maxRank}</td>
+              <td className={`p-4 capitalize ${member.rankColor}`}>
+                {member.rank}
+              </td>
+              <td className={`p-4 capitalize ${member.maxRankColor}`}>
+                {member.maxRank}
+              </td>
             </tr>
           ))}
         </tbody>
