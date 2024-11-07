@@ -1,6 +1,10 @@
 import Image from "next/image";
 import React from "react";
 import DoughnutChart from "./DoughnutChart";
+import CalendarHeatmap from "react-calendar-heatmap";
+import "react-calendar-heatmap/dist/styles.css";
+import "react-tooltip/dist/react-tooltip.css";
+import { Tooltip } from "react-tooltip";
 
 function MainLayout() {
   const topData = [
@@ -19,6 +23,59 @@ function MainLayout() {
       title: "Total Active Days",
       count: 368,
     },
+  ];
+
+  const heatmapData = [
+    { date: "2024-01-01", count: 2 },
+    { date: "2024-01-05", count: 1 },
+    { date: "2024-01-10", count: 3 },
+    { date: "2024-01-15", count: 4 },
+    { date: "2024-01-20", count: 5 },
+    { date: "2024-01-25", count: 2 },
+    { date: "2024-02-01", count: 3 },
+    { date: "2024-02-10", count: 5 },
+    { date: "2024-02-15", count: 1 },
+    { date: "2024-02-20", count: 2 },
+    { date: "2024-03-01", count: 4 },
+    { date: "2024-03-05", count: 3 },
+    { date: "2024-03-10", count: 1 },
+    { date: "2024-03-20", count: 5 },
+    { date: "2024-04-01", count: 2 },
+    { date: "2024-04-05", count: 4 },
+    { date: "2024-04-10", count: 3 },
+    { date: "2024-04-15", count: 1 },
+    { date: "2024-05-01", count: 5 },
+    { date: "2024-05-10", count: 2 },
+    { date: "2024-05-15", count: 3 },
+    { date: "2024-05-20", count: 4 },
+    { date: "2024-06-01", count: 1 },
+    { date: "2024-06-05", count: 3 },
+    { date: "2024-06-10", count: 2 },
+    { date: "2024-06-15", count: 5 },
+    { date: "2024-07-01", count: 4 },
+    { date: "2024-07-05", count: 3 },
+    { date: "2024-07-10", count: 2 },
+    { date: "2024-07-15", count: 1 },
+    { date: "2024-08-01", count: 5 },
+    { date: "2024-08-10", count: 4 },
+    { date: "2024-08-15", count: 3 },
+    { date: "2024-08-20", count: 2 },
+    { date: "2024-09-01", count: 1 },
+    { date: "2024-09-05", count: 5 },
+    { date: "2024-09-10", count: 4 },
+    { date: "2024-09-15", count: 3 },
+    { date: "2024-10-01", count: 2 },
+    { date: "2024-10-05", count: 1 },
+    { date: "2024-10-10", count: 4 },
+    { date: "2024-10-15", count: 5 },
+    { date: "2024-11-01", count: 3 },
+    { date: "2024-11-05", count: 2 },
+    { date: "2024-11-10", count: 1 },
+    { date: "2024-12-01", count: 5 },
+    { date: "2024-12-05", count: 4 },
+    { date: "2024-12-10", count: 3 },
+    { date: "2024-12-15", count: 2 },
+    { date: "2024-12-20", count: 1 },
   ];
 
   return (
@@ -105,8 +162,31 @@ function MainLayout() {
 
         {/* right part */}
         <div className="w-full">
-          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex items-center gap-5 bg-white">
-            670 submissions in last year
+          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+            <p>670 submissions in last year</p>
+            <CalendarHeatmap
+              startDate={new Date("2024-01-01")}
+              endDate={new Date("2024-12-31")}
+              values={heatmapData}
+              classForValue={(value) => {
+                if (!value) {
+                  return "color-empty";
+                }
+                return `color-github-${Math.min(value.count, 4)}`;
+              }}
+              tooltipDataAttrs={(value) => ({
+                "data-tooltip-id": "heatmap-tooltip",
+                "data-tooltip-content": value.date
+                  ? `${value.date}: ${value.count} submissions`
+                  : "No submissions",
+              })}
+            />
+            <Tooltip
+              id="heatmap-tooltip"
+              place="top"
+              type="dark"
+              effect="float"
+            />
           </div>
         </div>
       </div>

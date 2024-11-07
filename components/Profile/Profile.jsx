@@ -1,6 +1,7 @@
-import React from 'react'
-import MainLayout from './MainLayout';
-import ProfileSidebar from './ProfileSidebar';
+"use client";
+import React from "react";
+import MainLayout from "./MainLayout";
+import ProfileSidebar from "./ProfileSidebar";
 
 function Profile() {
   return (
@@ -15,4 +16,4 @@ function Profile() {
   );
 }
 
-export default Profile
+export default Profile;
