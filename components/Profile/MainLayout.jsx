@@ -3,7 +3,6 @@ import React from "react";
 import DoughnutChart from "./DoughnutChart";
 
 function MainLayout() {
-
   const topData = [
     {
       image: "/svgs/puzzle.svg",
@@ -63,13 +62,43 @@ function MainLayout() {
                 {["Easy", "Medium", "Hard"].map((item, index) => (
                   <div
                     key={index}
-                    className="flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md"
+                    className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md ${
+                      item === "Easy"
+                        ? "text-[#4CAF50]"
+                        : item === "Medium"
+                        ? "text-[#bfb029]"
+                        : "text-[#FF5722]"
+                    }`}
                   >
                     <p>{item}</p>
-                    <p>100</p>
+                    <p className="text-black">100</p>
                   </div>
                 ))}
               </div>
+            </div>
+
+            <hr />
+
+            <p className="text-sm text-slate-500">
+              Problems solved from Codechef
+            </p>
+            <div
+              className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md text-[#782d16]`}
+            >
+              <p>Competitive Programming</p>
+              <p className="text-black">100</p>
+            </div>
+
+            <hr />
+
+            <p className="text-sm text-slate-500">
+              Problems solved from Codeforces
+            </p>
+            <div
+              className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md text-[#4483f2]`}
+            >
+              <p>Competitive Programming</p>
+              <p className="text-black">100</p>
             </div>
           </div>
         </div>
