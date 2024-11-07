@@ -5,13 +5,22 @@ import members from "../../json/members.json";
 
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchUserRating = async (cf_username, retries = 3) => {
+    const cachedData = localStorage.getItem(cf_username);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
+
     try {
       const response = await axios.get(
         `https://codeforces.com/api/user.info?handles=${cf_username}`
       );
-      return response.data.result[0];
+      const data = response.data.result[0];
+
+      localStorage.setItem(cf_username, JSON.stringify(data));
+      return data;
     } catch (error) {
       if (retries > 0 && error.response?.status === 503) {
         console.warn(
@@ -28,6 +37,8 @@ const Leaderboard = () => {
 
   useEffect(() => {
     const fetchRatings = async () => {
+      setLoading(true);
+
       const updatedMembers = await Promise.all(
         Object.entries(members).map(async ([username, data]) => {
           const cfData = await fetchUserRating(data.cf_username);
@@ -35,16 +46,16 @@ const Leaderboard = () => {
           if (cfData) {
             return {
               ...data,
-              rating: cfData.rating || "N/A",
-              maxRating: cfData.maxRating || "N/A",
+              rating: cfData.rating || 0,
+              maxRating: cfData.maxRating || 0,
               rank: cfData.rank || "N/A",
               maxRank: cfData.maxRank || "N/A",
             };
           } else {
             return {
               ...data,
-              rating: "N/A",
-              maxRating: "N/A",
+              rating: 0,
+              maxRating: 0,
               rank: "N/A",
               maxRank: "N/A",
             };
@@ -52,12 +63,18 @@ const Leaderboard = () => {
         })
       );
 
-      updatedMembers.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      updatedMembers.sort((a, b) => b.rating - a.rating);
+
       setLeaderboardData(updatedMembers);
+      setLoading(false);
     };
 
     fetchRatings();
   }, []);
+
+  if (loading) {
+    return <div className="text-center text-xl">Loading leaderboard...</div>;
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-8">
@@ -67,9 +84,9 @@ const Leaderboard = () => {
           <tr className="bg-blue-500 text-white text-left">
             <th className="p-4">Name</th>
             <th className="p-4">Year</th>
-            <th className="p-4">LeetCode Profile</th>
-            <th className="p-4">CodeChef Profile</th>
-            <th className="p-4">Codeforces Profile</th>
+            <th className="p-4">LeetCode</th>
+            <th className="p-4">CodeChef</th>
+            <th className="p-4">Codeforces</th>
             <th className="p-4">Rating</th>
             <th className="p-4">Rank</th>
             <th className="p-4">Max Rank</th>
