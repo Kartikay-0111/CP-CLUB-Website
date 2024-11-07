@@ -101,76 +101,80 @@ const Leaderboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Leaderboard</h1>
-      <table className="w-full max-w-100 bg-white shadow-md rounded-lg overflow-hidden">
-        <thead>
-          <tr className="bg-teal-500 text-white text-left">
-            <th className="p-4">Name</th>
-            <th className="p-4">Year</th>
-            <th className="p-4">LeetCode</th>
-            <th className="p-4">CodeChef</th>
-            <th className="p-4">Codeforces</th>
-            <th className="p-4">Rating</th>
-            <th className="p-4">Rank</th>
-            <th className="p-4">Max Rank</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leaderboardData.map((member, index) => (
-            <tr key={index} className="border-b hover:bg-gray-100">
-              <td className="p-4 text-gray-800">
-                <div className="flex items-center">
-                  <img
-                    src={member.titlePhoto}
-                    alt={member.name}
-                    className="w-10 h-10 rounded-full mr-4"
-                  />
-                  {member.name}
-                </div>
-              </td>
-              <td className="p-4 text-gray-600">{member.year}</td>
-              <td className="p-4 text-blue-600">
-                <a
-                  href={`https://leetcode.com/${member.lc_username}/`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {member.lc_username}
-                </a>
-              </td>
-              <td className="p-4 text-blue-600">
-                <a
-                  href={`https://www.codechef.com/users/${member.cc_username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {member.cc_username}
-                </a>
-              </td>
-              <td className="p-4 text-blue-600">
-                <a
-                  href={`https://codeforces.com/profile/${member.cf_username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {member.cf_username}
-                </a>
-              </td>
-              <td className="p-4 text-gray-800">{member.rating}</td>
-              <td className={`p-4 capitalize ${member.rankColor}`}>
-                {member.rank}
-              </td>
-              <td className={`p-4 capitalize ${member.maxRankColor}`}>
-                {member.maxRank}
-              </td>
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
+        Leaderboard
+      </h1>
+      <div className="w-full overflow-x-auto">
+        <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <thead>
+            <tr className="bg-teal-500 text-white text-left">
+              <th className="p-2 sm:p-4">Name</th>
+              <th className="p-2 sm:p-4">Year</th>
+              <th className="p-2 sm:p-4">LeetCode</th>
+              <th className="p-2 sm:p-4">CodeChef</th>
+              <th className="p-2 sm:p-4">Codeforces</th>
+              <th className="p-2 sm:p-4">Rating</th>
+              <th className="p-2 sm:p-4">Rank</th>
+              <th className="p-2 sm:p-4">Max Rank</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {leaderboardData.map((member, index) => (
+              <tr key={index} className="border-b hover:bg-gray-100">
+                <td className="p-2 sm:p-4 text-gray-800">
+                  <div className="flex items-center">
+                    <img
+                      src={member.titlePhoto}
+                      alt={member.name}
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-4"
+                    />
+                    <span className="text-sm sm:text-base">{member.name}</span>
+                  </div>
+                </td>
+                <td className="p-2 sm:p-4 text-gray-600">{member.year}</td>
+                <td className="p-2 sm:p-4 text-blue-600">
+                  <a
+                    href={`https://leetcode.com/${member.lc_username}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-sm sm:text-base"
+                  >
+                    {member.lc_username}
+                  </a>
+                </td>
+                <td className="p-2 sm:p-4 text-blue-600">
+                  <a
+                    href={`https://www.codechef.com/users/${member.cc_username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-sm sm:text-base"
+                  >
+                    {member.cc_username}
+                  </a>
+                </td>
+                <td className="p-2 sm:p-4 text-blue-600">
+                  <a
+                    href={`https://codeforces.com/profile/${member.cf_username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline text-sm sm:text-base"
+                  >
+                    {member.cf_username}
+                  </a>
+                </td>
+                <td className="p-2 sm:p-4 text-gray-800">{member.rating}</td>
+                <td className={`p-2 sm:p-4 capitalize ${member.rankColor}`}>
+                  {member.rank}
+                </td>
+                <td className={`p-2 sm:p-4 capitalize ${member.maxRankColor}`}>
+                  {member.maxRank}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
