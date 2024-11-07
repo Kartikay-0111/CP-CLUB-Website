@@ -1,11 +1,15 @@
 import Profile from '@/components/Profile/Profile'
 import { getLeetCodeData } from '@/lib/getLeetCodeData'
 import React from 'react'
+import members from '@/json/members.json'
+import { getCodeForcesData } from '@/lib/getCodeForcesData';
 
 async function page({params}) {
-  const username = (await params).username;
-  const leetCodeData = await getLeetCodeData(username);
-  console.log(leetCodeData);
+  const key = (await params).username;
+  const user_data = members[key];
+  
+  const leetCodeData = await getLeetCodeData(user_data.lc_username);
+  const codeForcesData = await getCodeForcesData(user_data.cf_username);
 
   return (
     <div>
