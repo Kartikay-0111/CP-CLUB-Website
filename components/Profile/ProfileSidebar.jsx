@@ -52,7 +52,7 @@ const ProfileSidebar = () => {
         <p>India,Mumbai</p>
         <p className="font-semibold pt-2">Contest Rankings</p>
         <div className="border-t-2 w-full my-2" />
-        <div className="shadow-lg py-3 w-3/4 px-8 bg-slate-100 my-2 rounded-md">
+        <div className="shadow-xl py-3 w-[80%] px-6 bg-slate-50 my-2 rounded-md">
           {ratingData.map((item, index) => {
             return (
               <div key={index} className="py-4 grid ">
