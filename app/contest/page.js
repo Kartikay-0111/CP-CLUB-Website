@@ -97,7 +97,7 @@ export default function Component() {
                 </Link>
                 {(event.platform === 'leetcode' || event.platform === 'codeforces') && dayjs(event.contestStartDate).isBefore(dayjs()) && (
                   <Link
-                  href={`/pastcontest?contestId=${event.contestCode}&contestName=${encodeURIComponent(formatContestName(event.contestName))}&platform=leetcode`}
+                  href={`/pastcontest?contestId=${event.contestCode}&contestName=${encodeURIComponent(formatContestName(event.contestName))}&platform=${event.platform}`}
                   passHref
                   target="_blank"
                   rel="noopener noreferrer"

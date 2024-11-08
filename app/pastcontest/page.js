@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Image from "next/image"
 import axios from "axios"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -18,7 +18,7 @@ const platformColors = {
   codeforces: "from-blue-400 to-blue-600",
 }
 
-export default function ContestLeaderboard() {
+function ContestLeaderboardContent() {
   const searchParams = useSearchParams()
   const contestName = searchParams.get('contestName')
   const platform = searchParams.get('platform')
@@ -136,5 +136,13 @@ export default function ContestLeaderboard() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function ContestLeaderboard() {
+  return (
+    <Suspense fallback={<div>Loading contest data...</div>}>
+      <ContestLeaderboardContent />
+    </Suspense>
   )
 }

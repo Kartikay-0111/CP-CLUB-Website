@@ -23,7 +23,6 @@ export async function GET(req) {
         const data = fs.readFileSync(filePath, 'utf-8');
         const users = JSON.parse(data);
 
-        // Map cf_username to actual name
         userHandles = Object.values(users).map(user => user.cf_username);
         userMapping = Object.fromEntries(
             Object.values(users).map(user => [user.cf_username, user.name])
