@@ -1,55 +1,120 @@
-import React from "react";
+"use client";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
 
-const ProfileContestTable = () => {
-  const contests = [
-    {
-      id: 12,
-      contest: "Codeforces Round #496 (Div.2)",
-      startTime: "Dec/20/2019 22:35 UTC+6",
-      rank: 2096,
-      solved: 2,
-    },
-    {
-      id: 13,
-      contest: "Codeforces Round #496 (Div.2)",
-      startTime: "Dec/20/2019 22:35 UTC+6",
-      rank: 2096,
-      solved: 2,
-    },
-    {
-      id: 14,
-      contest: "Codeforces Round #496 (Div.2)",
-      startTime: "Dec/20/2019 22:35 UTC+6",
-      rank: 2096,
-      solved: 2,
-    },
-  ];
+const ProfileContestTable = ({data}) => {
+  const [contests, setContests] = useState([]);
+  useEffect(()=>{
+    setContests(data.mergedContests);
+  },[data])
+
+  const sortedContests = contests.sort((a, b) => b.startTime - a.startTime);
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString(); 
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(contests.length / itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const indexOfFirstItem = (currentPage - 1) * itemsPerPage;
+  const currentContests = sortedContests.slice(
+    indexOfFirstItem,
+    indexOfFirstItem + itemsPerPage
+  );
 
   return (
-    <table className="w-full text-left border-collapse">
-      <thead>
-        <tr className="text-slate-500">
-          <th className="p-2 text-sm font-medium">No.</th>
-          <th className="p-2 text-sm font-medium">Contest</th>
-          <th className="p-2 text-sm font-medium">Start Time</th>
-          <th className="p-2 text-sm font-medium">Rank</th>
-          <th className="p-2 text-sm font-medium">Solved</th>
-        </tr>
-      </thead>
-      <tbody>
-        {contests.map((contest) => (
-          <tr key={contest.id} className="border-t">
-            <td className="py-4 text-sm text-gray-700">{contest.id}</td>
-            <td className="py-4 text-sm text-gray-700 underline">
-              {contest.contest}
-            </td>
-            <td className="py-4 text-sm text-gray-700">{contest.startTime}</td>
-            <td className="py-4 text-sm text-gray-700">{contest.rank}</td>
-            <td className="py-4 text-sm text-gray-700">{contest.solved}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div>
+      {!contests || contests.length !== 0 ? (
+        <>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="text-slate-500">
+                <th className="p-2 text-sm font-medium">Contest</th>
+                <th className="p-2 text-sm font-medium">Start Time</th>
+                <th className="p-2 text-sm font-medium">Rank</th>
+                <th className="p-2 text-sm font-medium">Solved</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentContests.map((contest, index) => (
+                <tr key={index}>
+                  <td className="py-4 text-sm text-gray-700 underline">
+                    <div className="flex gap-2">
+                      {contest.platform === "LeetCode" ? (
+                        <Image
+                          src="/svgs/lc.svg"
+                          width={0}
+                          height={0}
+                          className="w-5 h-5"
+                          alt="abcd"
+                        />
+                      ) : (
+                        <Image
+                          src="/svgs/cf.svg"
+                          width={0}
+                          height={0}
+                          className="w-5 h-5"
+                          alt="abcd"
+                        />
+                      )}
+                      <p>{contest.contestName} </p>
+                    </div>
+                  </td>
+                  <td className="py-4 text-sm text-gray-700">
+                    {formatDate(contest.startTime)}
+                  </td>
+                  <td className="py-4 text-sm text-gray-700">{contest.rank}</td>
+                  <td className="py-4 text-sm text-gray-700">
+                    {contest.problemsSolved ?? "No Data"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="flex justify-between items-center mt-4">
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm bg-gray-200 rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm bg-gray-200 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </>
+      ) : (
+        <div>
+          <p>No Records Found</p>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,63 +1,100 @@
-import React, { useRef, useEffect } from "react";
+"use client";
+import React, { useRef, useEffect, useState } from "react";
 import { Chart } from "chart.js/auto";
 
-const RatingChart = () => {
+const RatingChart = ({ data }) => {
+  const [contests, setContests] = useState([]);
+  const [ratings, setRatings] = useState([]);
+  const [dates, setDates] = useState([]);
+  const [ratingAvg, setRatingAvg] = useState(0);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    const ctx = chartRef.current.getContext("2d");
+    if (data && data.mergedContests) {
+      setContests(data.mergedContests);
+    }
+  }, [data]);
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, "rgb(121, 178, 250, 0.7)");
-    gradient.addColorStop(1, "rgb(121, 178, 250, 0)");
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString();
+  };
 
-    const data = {
-      labels: ["01 Sep", "07 Sep", "14 Sep", "21 Sep", "28 Sep"],
-      datasets: [
-        {
-          label: "Rating",
-          data: [1420, 1440, 1460, 1480, 1504],
-          fill: true,
-          backgroundColor: gradient,
-          borderColor: "rgb(121,178,250,1)",
-          borderWidth: 2,
-          tension: 0.4,
-        },
-      ],
-    };
+  useEffect(() => {
+    if (contests.length > 0) {
+      const sortedContests = contests.sort((a, b) => a.startTime - b.startTime);
+      setRatings(sortedContests.map((item) => item.newRating));
+      setDates(
+        sortedContests.map((item) =>
+          formatDate(item.startTime).substring(0, 10)
+        )
+      );      
+    }
+  }, [contests]);
 
-    const options = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (tooltipItem) => `Rating: ${tooltipItem.raw}`,
+  useEffect(() => {
+    if (ratings.length > 0 && dates.length > 0) {
+
+      let avg = (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length).toFixed(2);
+      setRatingAvg(avg);
+
+      const ctx = chartRef.current.getContext("2d");
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, "rgb(121, 178, 250, 0.7)");
+      gradient.addColorStop(1, "rgb(121, 178, 250, 0)");
+
+      const data = {
+        labels: dates,
+        datasets: [
+          {
+            label: "Rating",
+            data: ratings,
+            fill: true,
+            backgroundColor: gradient,
+            borderColor: "rgb(121,178,250,1)",
+            borderWidth: 2,
+            tension: 0.4,
+          },
+        ],
+      };
+
+      const options = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => `Rating: ${tooltipItem.raw}`,
+            },
+          },
+          legend: {
+            display: false,
           },
         },
-        legend: {
-          display: false,
-        },
-      },
-      scales: {
-        y: {
-          min: 1420,
-          max: 1520,
-          ticks: {
-            stepSize: 20,
+        scales: {
+          x: {
+            display: false,
+          },
+          y: {
+            min: Math.min(...ratings),
+            max: Math.max(...ratings),
+            ticks: {
+              stepSize: 20,
+            },
           },
         },
-      },
-    };
+      };
 
-    const myChart = new Chart(ctx, {
-      type: "line",
-      data: data,
-      options: options,
-    });
+      const myChart = new Chart(ctx, {
+        type: "line",
+        data: data,
+        options: options,
+      });
 
-    return () => myChart.destroy();
-  }, []);
+      return () => myChart.destroy();
+    }
+  }, [ratings, dates]);    
 
   return (
     <div
@@ -65,10 +102,15 @@ const RatingChart = () => {
         width: "100%",
         maxWidth: 600,
         margin: "0 auto",
-        textAlign: "center",
+        textAlign: "start",
+        overflow: "hidden",
       }}
     >
-      <div style={{ height: 300 }}>
+      <div>
+        <p className="text-sm">Contest Average Rating</p>
+        <p className="text-lg">{ratingAvg}</p>
+      </div>
+      <div style={{ height: 300, width: "100%" }}>
         <canvas ref={chartRef}></canvas>
       </div>
     </div>

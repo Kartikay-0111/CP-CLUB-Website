@@ -113,7 +113,7 @@ function MainLayout({ data }) {
               <p>Contests</p>
               <p className="text-sm cursor-pointer">See All</p>
             </div>
-            <ProfileContestTable />
+            <ProfileContestTable data={data} />
           </div>
 
           <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
@@ -162,11 +162,7 @@ function MainLayout({ data }) {
 
           {/* rating graph section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <div>
-              <p className="text-sm">Contest Average Rating</p>
-              <p className="text-lg">1504</p>
-            </div>
-            <RatingChart />
+            <RatingChart data={data} />
           </div>
         </div>
       </div>
