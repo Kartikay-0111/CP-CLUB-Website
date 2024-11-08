@@ -13,6 +13,7 @@ function MainLayout({ data }) {
     data.leetCodeData?.userContestDetails?.contestParticipation.length +
     data.codeForcesData?.ratingData?.length;
   let totalQuestion = data.leetCodeData?.acSubmissionNum[0]?.count;
+
   const topData = [
     {
       image: "/svgs/puzzle.svg",
@@ -154,7 +155,7 @@ function MainLayout({ data }) {
               <p>Contests</p>
               <p className="text-sm cursor-pointer">See All</p>
             </div>
-            <ProfileContestTable />
+            <ProfileContestTable data={data}/>
           </div>
         </div>
 
