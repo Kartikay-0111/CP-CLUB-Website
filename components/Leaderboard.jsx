@@ -57,14 +57,10 @@ const Leaderboard = () => {
       );
       return leetcodeRating;
     } catch (error) {
-      console.error(
-        `Error fetching LeetCode rating for ${lc_username}:`,
-        error
-      );
       return 0;
     }
   };
-  //fetch user ratings and LeetCode ratings
+
   const fetchLastFiveContests = async () => {
     try {
       const response = await axios.get(
@@ -74,7 +70,7 @@ const Leaderboard = () => {
       const lastFiveContests = contests
         .filter((contest) => contest.phase === "FINISHED")
         .slice(0, 5);
-
+      //console.log(lastFiveContests);
       return lastFiveContests;
     } catch (error) {
       console.error("Error fetching contests:", error);
@@ -90,16 +86,13 @@ const Leaderboard = () => {
       const attendedContestIds = response.data.result.map(
         (contest) => contest.contestId
       );
+      //console.log(attendedContestIds);
 
       const attendance = lastFiveContests.map((contest) =>
         attendedContestIds.includes(contest.id)
       );
       return attendance;
     } catch (error) {
-      console.error(
-        `Error fetching contest history for ${cf_username}:`,
-        error
-      );
       return [false, false, false, false, false];
     }
   };
@@ -172,13 +165,10 @@ const Leaderboard = () => {
       <div className="w-full overflow-x-auto">
         <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead>
-            <tr className="bg-teal-500 text-white text-left">
-              <th className="p-2 sm:p-4">Name</th>
+            <tr className="bg-teal-500 text-white text-center">
+              <th className="p-2 pr-10 sm:p-4">Name</th>
               <th className="p-2 sm:p-4">Year</th>
-              <th className="p-2 sm:p-4">Leetcode</th>
-              <th className="p-2 sm:p-4">CodeChef</th>
-              <th className="p-2 sm:p-4">Codeforces</th>
-              <th className="p-2 sm:p-4">LeetCode Rating</th>
+              <th className="p-2 sm:p-4">Leetcode Rating</th>
               <th className="p-2 sm:p-4">Codeforces Rating</th>
               <th className="p-2 sm:p-4">Rank</th>
               <th className="p-2 sm:p-4">Last 5 Contests Attendance</th>
@@ -186,9 +176,12 @@ const Leaderboard = () => {
           </thead>
           <tbody>
             {leaderboardData.map((member, index) => (
-              <tr key={index} className="border-b hover:bg-gray-100">
+              <tr
+                key={index}
+                className="border-b hover:bg-gray-100 text-center"
+              >
                 <td className="p-2 sm:p-4 text-gray-800">
-                  <div className="flex items-center">
+                  <div className="flex ml-10">
                     <img
                       src={member.titlePhoto}
                       alt={member.name}
@@ -205,22 +198,12 @@ const Leaderboard = () => {
                 <td className="p-2 sm:p-4 text-gray-600">{member.year}</td>
                 <td className="p-2 sm:p-4 text-blue-600">
                   <a
-                    href={`https://leetcode.com/${member.lc_username}/`}
+                    href={`https://leetcode.com/${member.lc_username}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline text-sm sm:text-base"
                   >
-                    {member.lc_username}
-                  </a>
-                </td>
-                <td className="p-2 sm:p-4 text-blue-600">
-                  <a
-                    href={`https://www.codechef.com/users/${member.cc_username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline text-sm sm:text-base"
-                  >
-                    {member.cc_username}
+                    {member.leetCodeRating}
                   </a>
                 </td>
                 <td className="p-2 sm:p-4 text-blue-600">
@@ -230,17 +213,13 @@ const Leaderboard = () => {
                     rel="noopener noreferrer"
                     className="hover:underline text-sm sm:text-base"
                   >
-                    {member.cf_username}
+                    {member.rating}
                   </a>
                 </td>
-                <td className="p-2 sm:p-4 text-gray-800">
-                  {member.leetCodeRating}
-                </td>
-                <td className="p-2 sm:p-4 text-gray-800">{member.rating}</td>
                 <td className={`p-2 sm:p-4 capitalize ${member.rankColor}`}>
                   {member.rank}
                 </td>
-                <td className="p-2 sm:p-4 flex space-x-2 items-center">
+                <td className="p-2 sm:p-4 flex space-x-2 items-center justify-center">
                   {member.attendance.map((attended, i) => (
                     <span key={i} className="text-lg">
                       {attended ? (

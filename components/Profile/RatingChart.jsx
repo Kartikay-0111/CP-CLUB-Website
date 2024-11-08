@@ -14,8 +14,8 @@ const RatingChart = ({ data }) => {
     if (data && data.mergedContests) {
       setContests(data.mergedContests);
     }
+    //console.log(data);
   }, [data]);
-  
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000);
@@ -31,14 +31,15 @@ const RatingChart = ({ data }) => {
         sortedContests.map((item) =>
           formatDate(item.startTime).substring(0, 10)
         )
-      );      
+      );
     }
   }, [contests]);
 
   useEffect(() => {
     if (ratings.length > 0 && dates.length > 0) {
-
-      let avg = (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length).toFixed(2);
+      let avg = (
+        ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length
+      ).toFixed(2);
       setRatingAvg(avg);
 
       const ctx = chartRef.current.getContext("2d");
@@ -97,7 +98,7 @@ const RatingChart = ({ data }) => {
 
       return () => myChart.destroy();
     }
-  }, [ranks, ratings, dates]);    
+  }, [ranks, ratings, dates]);
 
   return (
     <div
@@ -113,7 +114,7 @@ const RatingChart = ({ data }) => {
         <p className="text-sm">Contest Average Rating</p>
         <p className="text-lg">{ratingAvg}</p>
       </div>
-      <div style={{width: "100%" }}>
+      <div style={{ width: "100%" }}>
         <canvas ref={chartRef}></canvas>
       </div>
     </div>

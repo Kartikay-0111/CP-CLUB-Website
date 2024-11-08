@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import DoughnutChart from "./DoughnutChart";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
@@ -24,7 +24,6 @@ function mergeTopicData(leetCodeData, codeForcesData) {
       topicMap.set(topic.tagSlug, { ...topic });
     });
 
-    // Add or merge Codeforces topics
     cfTopics.forEach((topic) => {
       if (topicMap.has(topic.tagSlug)) {
         topicMap.get(topic.tagSlug).problemsSolved += topic.problemsSolved;
@@ -39,7 +38,72 @@ function mergeTopicData(leetCodeData, codeForcesData) {
   return combinedAnalysis;
 }
 
+async function getDailySolvedProblemsCount(userHandle) {
+  const response = await fetch(
+    `https://codeforces.com/api/user.status?handle=${userHandle}`
+  );
+  const data = await response.json();
+
+  if (data.status !== "OK") {
+    throw new Error("Failed to fetch user data");
+  }
+
+  const solvedProblems = data.result
+    .filter((submission) => submission.verdict === "OK")
+    .map((submission) => ({
+      date: new Date(submission.creationTimeSeconds * 1000)
+        .toISOString()
+        .split("T")[0],
+      problemId: `${submission.contestId}-${submission.problem.index}`,
+    }));
+
+  const dailyCounts = new Map();
+
+  solvedProblems.forEach(({ date, problemId }) => {
+    if (!dailyCounts.has(date)) {
+      dailyCounts.set(date, new Set());
+    }
+    dailyCounts.get(date).add(problemId);
+  });
+
+  const dailySolvedProblems = Array.from(dailyCounts, ([date, problems]) => ({
+    date,
+    count: problems.size,
+  }));
+
+  return dailySolvedProblems;
+}
+
+function getAverageContestRating(ratingData) {
+  if (!ratingData || ratingData.length === 0) return 0;
+
+  const totalRating = ratingData.reduce(
+    (sum, rating) => sum + rating.rating,
+    0
+  );
+  return totalRating / ratingData.length;
+}
+
 function MainLayout({ data }) {
+  const [dailySolvedProblem, setdailySolvedProblems] = useState([]);
+
+  useEffect(() => {
+    const fetchDailySolvedProblems = async () => {
+      try {
+        const dailySolvedProblems = await getDailySolvedProblemsCount(
+          data?.codeForcesData?.handle
+        );
+        setdailySolvedProblems(dailySolvedProblems);
+      } catch (error) {
+        console.error("Error fetching daily solved problems:", error);
+      }
+    };
+
+    if (data?.codeForcesData?.handle) {
+      fetchDailySolvedProblems();
+    }
+  }, [data?.codeForcesData?.handle]);
+
   let totalContests =
     data.leetCodeData?.userContestDetails?.contestParticipation.length +
     data.codeForcesData?.ratingData?.length;
@@ -50,9 +114,10 @@ function MainLayout({ data }) {
     data.codeForcesData?.topicAnalysis
   );
 
-  // console.log(codeForcesTopicAnalysis);
+  const averageContestRating = getAverageContestRating(
+    data.codeForcesData?.ratingData
+  );
 
-  // Transforming submissionCalendar data into heatmap format
   const heatmapData = Object.keys(calenderSubmission || {}).map((timestamp) => {
     const date = new Date(parseInt(timestamp) * 1000)
       .toISOString()
@@ -60,11 +125,44 @@ function MainLayout({ data }) {
     return { date, count: calenderSubmission[timestamp] };
   });
 
+  function mergeHeatmapAndDailySolvedProblems(
+    heatmapData,
+    dailySolvedProblems
+  ) {
+    const dailySolvedMap = new Map(
+      dailySolvedProblems.map(({ date, count }) => [date, count])
+    );
+
+    const mergedData = heatmapData.map(({ date, count }) => {
+      const dailySolvedCount = dailySolvedMap.get(date) || 0;
+      return {
+        date,
+        count: count + dailySolvedCount,
+      };
+    });
+
+    dailySolvedProblems.forEach(({ date, count }) => {
+      if (!mergedData.some((item) => item.date === date)) {
+        mergedData.push({
+          date,
+          count,
+        });
+      }
+    });
+
+    return mergedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  const mergedData = mergeHeatmapAndDailySolvedProblems(
+    heatmapData,
+    dailySolvedProblem
+  );
+
   const topData = [
     {
       image: "/svgs/puzzle.svg",
-      title: "Total Questions",
-      count: totalQuestion ?? 0,
+      title: "Codeforces Questions",
+      count: data.codeForcesData?.problemsSolvedCount ?? 0,
     },
     {
       image: "/svgs/trophy.svg",
@@ -85,12 +183,12 @@ function MainLayout({ data }) {
         {topData.map((data, index) => (
           <div
             key={index}
-            className=" w-full py-5 px-7 rounded-xl shadow-custom flex items-center gap-5 bg-white"
+            className="w-full py-5 px-7 rounded-xl shadow-custom flex items-center gap-5 bg-white"
           >
             <div className="bg-[#F5F6FE] rounded-full w-14 h-14 flex justify-center items-center">
               <Image
                 src={data.image}
-                alt="questions"
+                alt={data.title}
                 width={0}
                 height={0}
                 className="w-6 h-6"
@@ -104,48 +202,17 @@ function MainLayout({ data }) {
         ))}
       </div>
 
-      {/* middle part */}
       <div className="flex gap-7">
-        {/* left part */}
         <div className="w-full flex-1 flex flex-col gap-7">
-          {/* Problem solved section */}
-          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <p>Problems Solved</p>
-            <p className="text-sm text-slate-500">
-              Problems solved from leetcode
-            </p>
+          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+            <p>Problems solved from leetcode</p>
+
             <div className="flex gap-3">
               <DoughnutChart data={data.leetCodeData?.acSubmissionNum} />
             </div>
-
-            {/* <hr />
-
-            <p className="text-sm text-slate-500">
-              Problems solved from Codechef
-            </p>
-            <div
-              className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md text-[#782d16]`}
-            >
-              <p>Competitive Programming</p>
-              <p className="text-black">100</p>
-            </div> */}
-
-            <hr />
-
-            <p className="text-sm text-slate-500">
-              Problems solved in contests from Codeforces
-            </p>
-            <div
-              className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md text-[#4483f2]`}
-            >
-              <p>Competitive Programming</p>
-              <p className="text-black">
-                {data.codeForcesData?.problemsSolvedCount ?? 0}
-              </p>
-            </div>
           </div>
 
-          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between">
               <p>Contests</p>
               <Link href="/contest" className="text-sm cursor-pointer">
@@ -165,12 +232,11 @@ function MainLayout({ data }) {
                 {data?.leetCodeData?.acSubmissionNum[0].submissions} submissions
                 in last year
               </p>
-              {/* <p>Max Streak : 44</p> */}
             </div>
             <CalendarHeatmap
               startDate={new Date("2024-04-01")}
               endDate={new Date("2024-12-31")}
-              values={heatmapData}
+              values={mergedData}
               classForValue={(value) => {
                 if (!value) {
                   return "color-empty";
@@ -192,16 +258,15 @@ function MainLayout({ data }) {
             />
           </div>
 
-          {/* rating graph section */}
+          {/* Rating chart section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <RatingChart data={data} />
+            <RatingChart data={data?.codeForcesData?.ratingData} />
           </div>
 
-          {/* topic analysis */}
-          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <div className="flex justify-between">
-              <p>DSA Topic Analysis</p>
-            </div>
+          {/* Topic Analysis section */}
+
+          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+            <p>Topic Wise Analysis</p>
             <TopicAnalysis data={topicWiseAnalysis} />
           </div>
         </div>
