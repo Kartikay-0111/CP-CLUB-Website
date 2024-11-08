@@ -17,8 +17,6 @@ async function page({params}) {
     codeForcesData: codeForcesData ?? null
   }
 
-  console.log(data);
-
   
   return (
     <div>

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 
-const DoughnutChart = () => {
+const DoughnutChart = ({data}) => {
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
@@ -20,7 +20,7 @@ const DoughnutChart = () => {
         datasets: [
           {
             label: "DSA Progress",
-            data: [202, 219, 29],
+            data: [data[1].count, data[2].count, data[3].count],
             backgroundColor: ["#4CAF50", "#FFEB3B", "#FF5722"],
             borderColor: "#fff",
             borderWidth: 2,
@@ -51,12 +51,31 @@ const DoughnutChart = () => {
   }, []);
 
   return (
-    <div className="relative w-fit h-fit">
-      <canvas ref={chartRef} width="30" height="30" className="doughnutPie" />
-      <p className="absolute inset-0 flex justify-center items-center text-3xl">
-        350
-      </p>
-    </div>
+    <>
+      <div className="relative w-fit h-fit">
+        <canvas ref={chartRef} width="30" height="30" className="doughnutPie" />
+        <p className="absolute inset-0 flex justify-center items-center text-3xl">
+          {data[0].count}
+        </p>
+      </div>
+      <div className="w-full flex flex-col justify-center gap-1">
+        {["Easy", "Medium", "Hard"].map((item, index) => (
+          <div
+            key={index}
+            className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md ${
+              item === "Easy"
+                ? "text-[#4CAF50]"
+                : item === "Medium"
+                ? "text-[#bfb029]"
+                : "text-[#FF5722]"
+            }`}
+          >
+            <p>{item}</p>
+            <p className="text-black">{data[index+1].count}</p>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 

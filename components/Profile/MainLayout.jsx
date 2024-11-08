@@ -9,12 +9,15 @@ import RatingChart from "./RatingChart";
 import ProfileContestTable from "./ProfileContestTable";
 
 function MainLayout({ data }) {
-  let totalContests = data.leetCodeData?.userContestDetails?.attendedContestsCount + data.codeForcesData?.ratingData?.length
+  let totalContests =
+    data.leetCodeData?.userContestDetails?.contestParticipation.length +
+    data.codeForcesData?.ratingData?.length;
+  let totalQuestion = data.leetCodeData?.acSubmissionNum[0]?.count;
   const topData = [
     {
       image: "/svgs/puzzle.svg",
       title: "Total Questions",
-      count: data.leetCodeData?.acSubmissionNum[0]?.count ?? 0,
+      count: totalQuestion ?? 0,
     },
     {
       image: "/svgs/trophy.svg",
@@ -118,24 +121,7 @@ function MainLayout({ data }) {
               Problems solved from leetcode
             </p>
             <div className="flex gap-3">
-              <DoughnutChart />
-              <div className="w-full flex flex-col justify-center gap-1">
-                {["Easy", "Medium", "Hard"].map((item, index) => (
-                  <div
-                    key={index}
-                    className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md ${
-                      item === "Easy"
-                        ? "text-[#4CAF50]"
-                        : item === "Medium"
-                        ? "text-[#bfb029]"
-                        : "text-[#FF5722]"
-                    }`}
-                  >
-                    <p>{item}</p>
-                    <p className="text-black">100</p>
-                  </div>
-                ))}
-              </div>
+              <DoughnutChart data={data.leetCodeData?.acSubmissionNum} />
             </div>
 
             <hr />
