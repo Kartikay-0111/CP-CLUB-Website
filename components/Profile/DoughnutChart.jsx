@@ -1,14 +1,19 @@
-"use client"
+"use client";
 import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 
 const DoughnutChart = () => {
   const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
 
   useEffect(() => {
     const ctx = chartRef.current.getContext("2d");
 
-    new Chart(ctx, {
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy();
+    }
+
+    chartInstanceRef.current = new Chart(ctx, {
       type: "doughnut",
       data: {
         labels: ["Easy", "Medium", "Hard"],
@@ -37,12 +42,20 @@ const DoughnutChart = () => {
         cutout: "70%",
       },
     });
+
+    return () => {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy();
+      }
+    };
   }, []);
 
   return (
     <div className="relative w-fit h-fit">
       <canvas ref={chartRef} width="30" height="30" className="doughnutPie" />
-      <p className="absolute inset-0 flex justify-center items-center text-3xl">350</p>
+      <p className="absolute inset-0 flex justify-center items-center text-3xl">
+        350
+      </p>
     </div>
   );
 };

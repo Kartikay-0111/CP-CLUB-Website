@@ -11,12 +11,18 @@ async function page({params}) {
   const leetCodeData = await getLeetCodeData(user_data.lc_username);
   const codeForcesData = await getCodeForcesData(user_data.cf_username);
 
-  console.log(leetCodeData);
-  console.log(codeForcesData);
+  let data = {
+    user_data:user_data,
+    leetCodeData: leetCodeData ?? null,
+    codeForcesData: codeForcesData ?? null
+  }
+
+  console.log(data);
+
   
   return (
     <div>
-      <Profile />
+      <Profile data={data} />
     </div>
   );
 }

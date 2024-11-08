@@ -5,18 +5,21 @@ import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
+import RatingChart from "./RatingChart";
+import ProfileContestTable from "./ProfileContestTable";
 
-function MainLayout() {
+function MainLayout({ data }) {
+  let totalContests = data.leetCodeData?.userContestDetails?.attendedContestsCount + data.codeForcesData?.ratingData?.length
   const topData = [
     {
       image: "/svgs/puzzle.svg",
       title: "Total Questions",
-      count: 390,
+      count: data.leetCodeData?.acSubmissionNum[0]?.count ?? 0,
     },
     {
       image: "/svgs/trophy.svg",
       title: "Total Contests",
-      count: 22,
+      count: totalContests ?? 0,
     },
     {
       image: "/svgs/active-days.svg",
@@ -107,7 +110,8 @@ function MainLayout() {
       {/* middle part */}
       <div className="flex gap-7">
         {/* left part */}
-        <div className="w-full">
+        <div className="w-full flex-1 flex flex-col gap-7">
+          {/* Problem solved section */}
           <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <p>Problems Solved</p>
             <p className="text-sm text-slate-500">
@@ -158,14 +162,26 @@ function MainLayout() {
               <p className="text-black">100</p>
             </div>
           </div>
+
+          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+            <div className="flex justify-between">
+              <p>Contests</p>
+              <p className="text-sm cursor-pointer">See All</p>
+            </div>
+            <ProfileContestTable />
+          </div>
         </div>
 
         {/* right part */}
-        <div className="w-full">
+        <div className="w-full flex flex-col gap-7 flex-1">
+          {/* Heat map section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <p>670 submissions in last year</p>
+            <div className="flex justify-between text-sm text-slate-500">
+              <p>670 submissions in last year</p>
+              <p>Max Streak : 44</p>
+            </div>
             <CalendarHeatmap
-              startDate={new Date("2024-01-01")}
+              startDate={new Date("2024-04-01")}
               endDate={new Date("2024-12-31")}
               values={heatmapData}
               classForValue={(value) => {
@@ -187,6 +203,15 @@ function MainLayout() {
               type="dark"
               effect="float"
             />
+          </div>
+
+          {/* rating graph section */}
+          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+            <div>
+              <p className="text-sm">Contest Average Rating</p>
+              <p className="text-lg">1504</p>
+            </div>
+            <RatingChart />
           </div>
         </div>
       </div>
