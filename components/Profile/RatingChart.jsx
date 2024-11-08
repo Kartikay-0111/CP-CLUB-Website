@@ -5,6 +5,7 @@ import { Chart } from "chart.js/auto";
 const RatingChart = ({ data }) => {
   const [contests, setContests] = useState([]);
   const [ratings, setRatings] = useState([]);
+  const [ranks, setRanks] = useState([]);
   const [dates, setDates] = useState([]);
   const [ratingAvg, setRatingAvg] = useState(0);
   const chartRef = useRef(null);
@@ -24,6 +25,7 @@ const RatingChart = ({ data }) => {
   useEffect(() => {
     if (contests.length > 0) {
       const sortedContests = contests.sort((a, b) => a.startTime - b.startTime);
+      setRanks(sortedContests.map((item) => item.rank));
       setRatings(sortedContests.map((item) => item.newRating));
       setDates(
         sortedContests.map((item) =>
@@ -49,8 +51,8 @@ const RatingChart = ({ data }) => {
         labels: dates,
         datasets: [
           {
-            label: "Rating",
-            data: ratings,
+            label: "Ranks",
+            data: ranks,
             fill: true,
             backgroundColor: gradient,
             borderColor: "rgb(121,178,250,1)",
@@ -66,7 +68,7 @@ const RatingChart = ({ data }) => {
         plugins: {
           tooltip: {
             callbacks: {
-              label: (tooltipItem) => `Rating: ${tooltipItem.raw}`,
+              label: (tooltipItem) => `Ranks: ${tooltipItem.raw}`,
             },
           },
           legend: {
@@ -78,8 +80,8 @@ const RatingChart = ({ data }) => {
             display: false,
           },
           y: {
-            min: Math.min(...ratings),
-            max: Math.max(...ratings),
+            min: Math.min(...ranks),
+            max: Math.max(...ranks),
             ticks: {
               stepSize: 20,
             },
@@ -95,7 +97,7 @@ const RatingChart = ({ data }) => {
 
       return () => myChart.destroy();
     }
-  }, [ratings, dates]);    
+  }, [ranks, ratings, dates]);    
 
   return (
     <div
@@ -111,7 +113,7 @@ const RatingChart = ({ data }) => {
         <p className="text-sm">Contest Average Rating</p>
         <p className="text-lg">{ratingAvg}</p>
       </div>
-      <div style={{ height: 300, width: "100%" }}>
+      <div style={{width: "100%" }}>
         <canvas ref={chartRef}></canvas>
       </div>
     </div>

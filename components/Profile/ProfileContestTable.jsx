@@ -16,7 +16,7 @@ const ProfileContestTable = ({data}) => {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 7;
   const totalPages = Math.ceil(contests.length / itemsPerPage);
 
   const handleNextPage = () => {

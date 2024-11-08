@@ -8,6 +8,7 @@ import { Tooltip } from "react-tooltip";
 import RatingChart from "./RatingChart";
 import ProfileContestTable from "./ProfileContestTable";
 import TopicAnalysis from "./TopicAnalysis";
+import Link from "next/link";
 
 function MainLayout({ data }) {
   let totalContests =
@@ -83,7 +84,7 @@ function MainLayout({ data }) {
               <DoughnutChart data={data.leetCodeData?.acSubmissionNum} />
             </div>
 
-            <hr />
+            {/* <hr />
 
             <p className="text-sm text-slate-500">
               Problems solved from Codechef
@@ -93,7 +94,7 @@ function MainLayout({ data }) {
             >
               <p>Competitive Programming</p>
               <p className="text-black">100</p>
-            </div>
+            </div> */}
 
             <hr />
 
@@ -111,16 +112,9 @@ function MainLayout({ data }) {
           <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between">
               <p>Contests</p>
-              <p className="text-sm cursor-pointer">See All</p>
+              <Link href="/contests" className="text-sm cursor-pointer">See All</Link>
             </div>
             <ProfileContestTable data={data} />
-          </div>
-
-          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <div className="flex justify-between">
-              <p>DSA Topic Analysis</p>
-            </div>
-            <TopicAnalysis data={topicWiseAnalysis} />
           </div>
         </div>
 
@@ -163,6 +157,14 @@ function MainLayout({ data }) {
           {/* rating graph section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <RatingChart data={data} />
+          </div>
+
+{/* topic analysis */}
+          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+            <div className="flex justify-between">
+              <p>DSA Topic Analysis</p>
+            </div>
+            <TopicAnalysis data={topicWiseAnalysis} />
           </div>
         </div>
       </div>

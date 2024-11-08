@@ -15,11 +15,11 @@ const ProfileSidebar = ({ data }) => {
       platform: "Leetcode",
       rating: data.leetCodeData?.userContestDetails?.contestRating?.toFixed(2) ?? 0,
     },
-    {
-      image: "/svgs/cc.svg",
-      platform: "Codechef",
-      rating: "1400",
-    },
+    // {
+    //   image: "/svgs/cc.svg",
+    //   platform: "Codechef",
+    //   rating: "1400",
+    // },
   ];
   const platformsData = [
     {
@@ -58,7 +58,7 @@ const ProfileSidebar = ({ data }) => {
         )}
         <div className="text-center">
           <p className="text-xl font-bold">{data.user_data?.name}</p>
-          <p className="text-sm text-slate-500">India,Mumbai</p>
+          <p className="text-sm text-slate-500">Mumbai, India</p>
         </div>
         <p className="pt-2">Contest Rankings</p>
         <div className="w-full">

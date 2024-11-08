@@ -24,7 +24,7 @@ const TopicAnalysis = ({ data }) => {
                 {category}
               </span>
             </div>
-            <div className="flex gap-4 flex-wrap">
+            <div className="flex gap-4 flex-wrap text-sm">
               {displayedItems.map((item, index) => (
                 <div key={index} className="flex gap-2 items-center">
                   <span className="px-4 py-2 bg-gray-200 rounded-full">
