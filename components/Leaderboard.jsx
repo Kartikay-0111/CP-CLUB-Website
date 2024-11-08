@@ -63,7 +63,7 @@ const Leaderboard = () => {
       return 0;
     }
   };
-
+  //fetch user ratings and LeetCode ratings
   const fetchLastFiveContests = async () => {
     try {
       const response = await axios.get(
