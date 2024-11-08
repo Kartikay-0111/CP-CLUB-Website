@@ -99,20 +99,24 @@ function MainLayout({ data }) {
             <hr />
 
             <p className="text-sm text-slate-500">
-              Problems solved from Codeforces
+              Problems solved in contests from Codeforces
             </p>
             <div
               className={`flex justify-between w-full bg-[#F5F6FE] px-3 py-1 rounded-md text-[#4483f2]`}
             >
               <p>Competitive Programming</p>
-              <p className="text-black">100</p>
+              <p className="text-black">
+                {data.codeForcesData?.problemsSolvedCount ?? 0}
+              </p>
             </div>
           </div>
 
           <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between">
               <p>Contests</p>
-              <Link href="/contests" className="text-sm cursor-pointer">See All</Link>
+              <Link href="/contests" className="text-sm cursor-pointer">
+                See All
+              </Link>
             </div>
             <ProfileContestTable data={data} />
           </div>
@@ -159,7 +163,7 @@ function MainLayout({ data }) {
             <RatingChart data={data} />
           </div>
 
-{/* topic analysis */}
+          {/* topic analysis */}
           <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between">
               <p>DSA Topic Analysis</p>

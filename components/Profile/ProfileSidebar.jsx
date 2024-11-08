@@ -13,7 +13,7 @@ const ProfileSidebar = ({ data }) => {
     {
       image: "/svgs/lc.svg",
       platform: "Leetcode",
-      rating: data.leetCodeData?.userContestDetails?.contestRating?.toFixed(2) ?? 0,
+      rating: data.leetCodeData?.userContestDetails?.rating?.toFixed(0) ?? 0,
     },
     // {
     //   image: "/svgs/cc.svg",

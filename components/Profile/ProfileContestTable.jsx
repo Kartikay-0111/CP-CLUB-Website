@@ -16,7 +16,7 @@ const ProfileContestTable = ({data}) => {
   };
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 7;
+  const itemsPerPage = 6;
   const totalPages = Math.ceil(contests.length / itemsPerPage);
 
   const handleNextPage = () => {
@@ -41,7 +41,7 @@ const ProfileContestTable = ({data}) => {
     <div>
       {!contests || contests.length !== 0 ? (
         <>
-          <table className="w-full text-left">
+          <table className="w-full text-left border-separate border-spacing-2">
             <thead>
               <tr className="text-slate-500">
                 <th className="p-2 text-sm font-medium">Contest</th>
