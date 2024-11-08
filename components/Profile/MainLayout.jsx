@@ -10,13 +10,47 @@ import ProfileContestTable from "./ProfileContestTable";
 import TopicAnalysis from "./TopicAnalysis";
 import Link from "next/link";
 
+function mergeTopicData(leetCodeData, codeForcesData) {
+  const combinedAnalysis = { advanced: [], intermediate: [], fundamental: [] };
+
+  ["advanced", "intermediate", "fundamental"].forEach((level) => {
+    const leetTopics = leetCodeData[level] || [];
+    const cfTopics = codeForcesData[level] || [];
+
+    const topicMap = new Map();
+
+    // Add LeetCode topics
+    leetTopics.forEach((topic) => {
+      topicMap.set(topic.tagSlug, { ...topic });
+    });
+
+    // Add or merge Codeforces topics
+    cfTopics.forEach((topic) => {
+      if (topicMap.has(topic.tagSlug)) {
+        topicMap.get(topic.tagSlug).problemsSolved += topic.problemsSolved;
+      } else {
+        topicMap.set(topic.tagSlug, { ...topic });
+      }
+    });
+
+    combinedAnalysis[level] = Array.from(topicMap.values());
+  });
+
+  return combinedAnalysis;
+}
+
 function MainLayout({ data }) {
   let totalContests =
     data.leetCodeData?.userContestDetails?.contestParticipation.length +
     data.codeForcesData?.ratingData?.length;
   let totalQuestion = data.leetCodeData?.acSubmissionNum[0]?.count;
   let calenderSubmission = data.leetCodeData?.submissionCalendar;
-  let topicWiseAnalysis = data.leetCodeData?.topicWiseAnalysis;
+  const topicWiseAnalysis = mergeTopicData(
+    data.leetCodeData?.topicWiseAnalysis,
+    data.codeForcesData?.topicAnalysis
+  );
+
+  // console.log(codeForcesTopicAnalysis);
 
   // Transforming submissionCalendar data into heatmap format
   const heatmapData = Object.keys(calenderSubmission || {}).map((timestamp) => {
@@ -114,7 +148,7 @@ function MainLayout({ data }) {
           <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between">
               <p>Contests</p>
-              <Link href="/contests" className="text-sm cursor-pointer">
+              <Link href="/contest" className="text-sm cursor-pointer">
                 See All
               </Link>
             </div>

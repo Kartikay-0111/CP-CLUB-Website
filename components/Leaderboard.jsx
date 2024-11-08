@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import members from "../json/members.json";
 import Link from "next/link";
+import { Check, CircleCheck, CircleX, X } from "lucide-react";
 
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -194,7 +195,7 @@ const Leaderboard = () => {
                       className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-4"
                     />
                     <Link
-                      className="text-sm sm:text-base"
+                      className="text-sm sm:text-base text-orange-800 hover:underline"
                       href={`profile/${member.username}`}
                     >
                       {member.name}
@@ -239,10 +240,18 @@ const Leaderboard = () => {
                 <td className={`p-2 sm:p-4 capitalize ${member.rankColor}`}>
                   {member.rank}
                 </td>
-                <td className="p-2 sm:p-4 flex space-x-2">
+                <td className="p-2 sm:p-4 flex space-x-2 items-center">
                   {member.attendance.map((attended, i) => (
                     <span key={i} className="text-lg">
-                      {attended ? "✅" : "❌"}
+                      {attended ? (
+                        <CircleCheck
+                          color="green"
+                          size="25"
+                          className="font-bold"
+                        />
+                      ) : (
+                        <CircleX color="red" size="25" className="font-bold" />
+                      )}
                     </span>
                   ))}
                 </td>

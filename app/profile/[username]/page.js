@@ -1,10 +1,10 @@
-import Profile from '@/components/Profile/Profile'
-import { getLeetCodeData } from '@/lib/getLeetCodeData'
-import React from 'react'
-import members from '@/json/members.json'
-import { getCodeForcesData } from '@/lib/getCodeForcesData';
+import Profile from "@/components/Profile/Profile";
+import { getLeetCodeData } from "@/lib/getLeetCodeData";
+import React from "react";
+import members from "@/json/members.json";
+import { getCodeForcesData } from "@/lib/getCodeForcesData";
 
-async function page({params}) {
+async function page({ params }) {
   const key = (await params).username;
   const user_data = members[key];
 
@@ -33,7 +33,7 @@ async function page({params}) {
   ];
 
   data["mergedContests"] = mergedContestsArray;
-  console.log(data);
+  // console.log(data);
 
   return (
     <div>
@@ -48,11 +48,12 @@ function normalizeContestData(contest, platform) {
     contestId: contest.contestId || null,
     contestName:
       contest.contestName || contest.contest?.title || "Unknown Contest",
-    startTime: contest?.contest?.startTime || contest.ratingUpdateTimeSeconds || null,
+    startTime:
+      contest?.contest?.startTime || contest.ratingUpdateTimeSeconds || null,
     newRating: contest.newRating || contest.rating || null,
     rank: contest.rank || contest.ranking || null,
     problemsSolved: contest.problemsSolved || null,
   };
 }
 
-export default page
+export default page;
