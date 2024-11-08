@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import members from "../json/members.json";
+import Link from "next/link";
 
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -56,6 +57,7 @@ const Leaderboard = () => {
           if (cfData) {
             return {
               ...data,
+              username: username,
               rating: cfData.rating || 0,
               maxRating: cfData.maxRating || 0,
               rank: cfData.rank || "N/A",
@@ -88,7 +90,7 @@ const Leaderboard = () => {
       );
 
       updatedMembers.sort((a, b) => b.rating - a.rating);
-
+      console.log(updatedMembers);
       setLeaderboardData(updatedMembers);
       setLoading(false);
     };
@@ -97,7 +99,7 @@ const Leaderboard = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-xl">Loading leaderboard...</div>;
+    return <div className="text-center text-xl">Loading Stats...</div>;
   }
 
   return (
@@ -129,7 +131,12 @@ const Leaderboard = () => {
                       alt={member.name}
                       className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-4"
                     />
-                    <span className="text-sm sm:text-base">{member.name}</span>
+                    <Link
+                      className="text-sm sm:text-base"
+                      href={`profile/${member.username}`}
+                    >
+                      {member.name}
+                    </Link>
                   </div>
                 </td>
                 <td className="p-2 sm:p-4 text-gray-600">{member.year}</td>

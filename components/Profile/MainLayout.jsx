@@ -7,12 +7,23 @@ import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import RatingChart from "./RatingChart";
 import ProfileContestTable from "./ProfileContestTable";
+import TopicAnalysis from "./TopicAnalysis";
 
 function MainLayout({ data }) {
   let totalContests =
     data.leetCodeData?.userContestDetails?.contestParticipation.length +
     data.codeForcesData?.ratingData?.length;
   let totalQuestion = data.leetCodeData?.acSubmissionNum[0]?.count;
+  let calenderSubmission = data.leetCodeData?.submissionCalendar;
+  let topicWiseAnalysis = data.leetCodeData?.topicWiseAnalysis;
+
+  // Transforming submissionCalendar data into heatmap format
+  const heatmapData = Object.keys(calenderSubmission || {}).map((timestamp) => {
+    const date = new Date(parseInt(timestamp) * 1000)
+      .toISOString()
+      .split("T")[0];
+    return { date, count: calenderSubmission[timestamp] };
+  });
 
   const topData = [
     {
@@ -28,61 +39,8 @@ function MainLayout({ data }) {
     {
       image: "/svgs/active-days.svg",
       title: "Total Active Days",
-      count: 368,
+      count: Object.keys(calenderSubmission).length,
     },
-  ];
-
-  const heatmapData = [
-    { date: "2024-01-01", count: 2 },
-    { date: "2024-01-05", count: 1 },
-    { date: "2024-01-10", count: 3 },
-    { date: "2024-01-15", count: 4 },
-    { date: "2024-01-20", count: 5 },
-    { date: "2024-01-25", count: 2 },
-    { date: "2024-02-01", count: 3 },
-    { date: "2024-02-10", count: 5 },
-    { date: "2024-02-15", count: 1 },
-    { date: "2024-02-20", count: 2 },
-    { date: "2024-03-01", count: 4 },
-    { date: "2024-03-05", count: 3 },
-    { date: "2024-03-10", count: 1 },
-    { date: "2024-03-20", count: 5 },
-    { date: "2024-04-01", count: 2 },
-    { date: "2024-04-05", count: 4 },
-    { date: "2024-04-10", count: 3 },
-    { date: "2024-04-15", count: 1 },
-    { date: "2024-05-01", count: 5 },
-    { date: "2024-05-10", count: 2 },
-    { date: "2024-05-15", count: 3 },
-    { date: "2024-05-20", count: 4 },
-    { date: "2024-06-01", count: 1 },
-    { date: "2024-06-05", count: 3 },
-    { date: "2024-06-10", count: 2 },
-    { date: "2024-06-15", count: 5 },
-    { date: "2024-07-01", count: 4 },
-    { date: "2024-07-05", count: 3 },
-    { date: "2024-07-10", count: 2 },
-    { date: "2024-07-15", count: 1 },
-    { date: "2024-08-01", count: 5 },
-    { date: "2024-08-10", count: 4 },
-    { date: "2024-08-15", count: 3 },
-    { date: "2024-08-20", count: 2 },
-    { date: "2024-09-01", count: 1 },
-    { date: "2024-09-05", count: 5 },
-    { date: "2024-09-10", count: 4 },
-    { date: "2024-09-15", count: 3 },
-    { date: "2024-10-01", count: 2 },
-    { date: "2024-10-05", count: 1 },
-    { date: "2024-10-10", count: 4 },
-    { date: "2024-10-15", count: 5 },
-    { date: "2024-11-01", count: 3 },
-    { date: "2024-11-05", count: 2 },
-    { date: "2024-11-10", count: 1 },
-    { date: "2024-12-01", count: 5 },
-    { date: "2024-12-05", count: 4 },
-    { date: "2024-12-10", count: 3 },
-    { date: "2024-12-15", count: 2 },
-    { date: "2024-12-20", count: 1 },
   ];
 
   return (
@@ -157,6 +115,13 @@ function MainLayout({ data }) {
             </div>
             <ProfileContestTable data={data} />
           </div>
+
+          <div className=" w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+            <div className="flex justify-between">
+              <p>DSA Topic Analysis</p>
+            </div>
+            <TopicAnalysis data={topicWiseAnalysis} />
+          </div>
         </div>
 
         {/* right part */}
@@ -164,8 +129,11 @@ function MainLayout({ data }) {
           {/* Heat map section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between text-sm text-slate-500">
-              <p>670 submissions in last year</p>
-              <p>Max Streak : 44</p>
+              <p>
+                {data?.leetCodeData?.acSubmissionNum[0].submissions} submissions
+                in last year
+              </p>
+              {/* <p>Max Streak : 44</p> */}
             </div>
             <CalendarHeatmap
               startDate={new Date("2024-04-01")}
