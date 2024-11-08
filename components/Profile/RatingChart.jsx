@@ -14,6 +14,7 @@ const RatingChart = ({ data }) => {
       setContests(data.mergedContests);
     }
   }, [data]);
+  
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000);
