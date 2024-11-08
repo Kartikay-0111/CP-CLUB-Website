@@ -194,10 +194,6 @@ function MainLayout({ data }) {
 
           {/* rating graph section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <div>
-              <p className="text-sm">Contest Average Rating</p>
-              <p className="text-lg">1504</p>
-            </div>
             <RatingChart data={data} />
           </div>
         </div>

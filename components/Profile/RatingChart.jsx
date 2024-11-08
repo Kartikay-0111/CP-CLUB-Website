@@ -6,6 +6,7 @@ const RatingChart = ({ data }) => {
   const [contests, setContests] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [dates, setDates] = useState([]);
+  const [ratingAvg, setRatingAvg] = useState(0);
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -27,12 +28,16 @@ const RatingChart = ({ data }) => {
         sortedContests.map((item) =>
           formatDate(item.startTime).substring(0, 10)
         )
-      );
+      );      
     }
   }, [contests]);
 
   useEffect(() => {
     if (ratings.length > 0 && dates.length > 0) {
+
+      let avg = (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length).toFixed(2);
+      setRatingAvg(avg);
+
       const ctx = chartRef.current.getContext("2d");
 
       const gradient = ctx.createLinearGradient(0, 0, 0, 400);
@@ -89,7 +94,7 @@ const RatingChart = ({ data }) => {
 
       return () => myChart.destroy();
     }
-  }, [ratings, dates]);  
+  }, [ratings, dates]);    
 
   return (
     <div
@@ -97,10 +102,14 @@ const RatingChart = ({ data }) => {
         width: "100%",
         maxWidth: 600,
         margin: "0 auto",
-        textAlign: "center",
+        textAlign: "start",
         overflow: "hidden",
       }}
     >
+      <div>
+        <p className="text-sm">Contest Average Rating</p>
+        <p className="text-lg">{ratingAvg}</p>
+      </div>
       <div style={{ height: 300, width: "100%" }}>
         <canvas ref={chartRef}></canvas>
       </div>
