@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import members from "../json/members.json";
@@ -35,62 +36,120 @@ const Leaderboard = () => {
     }
   };
 
+  const fetchLeetCodeRating = async (lc_username) => {
+    const cachedData = localStorage.getItem(`lc_${lc_username}`);
+    if (cachedData) {
+      return JSON.parse(cachedData).leetcodeRating;
+    }
+
+    try {
+      const response = await axios.get(
+        `https://leetcodeapi-v1.vercel.app/contest/${lc_username}`
+      );
+      const data = response.data.userContestDetails;
+
+      const leetcodeRating = data?.rating ? Math.floor(data.rating) : 0;
+      localStorage.setItem(
+        `lc_${lc_username}`,
+        JSON.stringify({ leetcodeRating })
+      );
+      return leetcodeRating;
+    } catch (error) {
+      console.error(
+        `Error fetching LeetCode rating for ${lc_username}:`,
+        error
+      );
+      return 0;
+    }
+  };
+
+  const fetchLastFiveContests = async () => {
+    try {
+      const response = await axios.get(
+        "https://codeforces.com/api/contest.list"
+      );
+      const contests = response.data.result;
+      const lastFiveContests = contests
+        .filter((contest) => contest.phase === "FINISHED")
+        .slice(0, 5);
+
+      return lastFiveContests;
+    } catch (error) {
+      console.error("Error fetching contests:", error);
+      return [];
+    }
+  };
+
+  const fetchUserAttendance = async (cf_username, lastFiveContests) => {
+    try {
+      const response = await axios.get(
+        `https://codeforces.com/api/user.rating?handle=${cf_username}`
+      );
+      const attendedContestIds = response.data.result.map(
+        (contest) => contest.contestId
+      );
+
+      const attendance = lastFiveContests.map((contest) =>
+        attendedContestIds.includes(contest.id)
+      );
+      return attendance;
+    } catch (error) {
+      console.error(
+        `Error fetching contest history for ${cf_username}:`,
+        error
+      );
+      return [false, false, false, false, false];
+    }
+  };
+
   const getRankColor = (rating) => {
-    if (rating >= 2400) return "bg-red-500 text-white";
-    if (rating >= 2200) return "bg-orange-500 text-white";
+    if (rating >= 2000) return "bg-orange-500 text-white";
+    if (rating >= 1800) return "bg-purple-500 text-white";
     if (rating >= 1600) return "bg-blue-500 text-white";
     if (rating >= 1400) return "bg-cyan-500 text-white";
     if (rating >= 1200) return "bg-green-500 text-white";
-    if (rating >= 0) return "bg-gray-500 text-white";
     return "bg-gray-500 text-white";
   };
 
   useEffect(() => {
     const fetchRatings = async () => {
       setLoading(true);
+      const lastFiveContests = await fetchLastFiveContests();
 
-      const updatedMembers = await Promise.all(
-        Object.entries(members).map(async ([username, data]) => {
-          const cfData = await fetchUserRating(data.cf_username);
+      try {
+        const updatedMembers = await Promise.all(
+          Object.entries(members).map(async ([username, data]) => {
+            const cfData = await fetchUserRating(data.cf_username);
+            const leetCodeRating = await fetchLeetCodeRating(data.lc_username);
+            const attendance = await fetchUserAttendance(
+              data.cf_username,
+              lastFiveContests
+            );
 
-          if (cfData) {
             return {
               ...data,
-              rating: cfData.rating || 0,
-              maxRating: cfData.maxRating || 0,
-              rank: cfData.rank || "N/A",
-              maxRank: cfData.maxRank || "N/A",
+              rating: cfData?.rating || 0,
+              rank: cfData?.rank || "N/A",
               titlePhoto:
-                cfData.titlePhoto ||
+                cfData?.titlePhoto ||
                 "https://userpic.codeforces.org/no-title.jpg",
               rankColor:
-                cfData.rank === "N/A"
+                cfData?.rank === "N/A"
                   ? "bg-red-500 text-white"
-                  : getRankColor(cfData.maxRating || 0),
-              maxRankColor:
-                cfData.maxRank === "N/A"
-                  ? "bg-red-500 text-white"
-                  : getRankColor(cfData.maxRating || 0),
+                  : getRankColor(cfData.rating || 0),
+              leetCodeRating,
+              attendance,
             };
-          } else {
-            return {
-              ...data,
-              rating: 0,
-              maxRating: 0,
-              rank: "N/A",
-              maxRank: "N/A",
-              titlePhoto: "https://userpic.codeforces.org/no-title.jpg",
-              rankColor: "bg-red-500 text-white",
-              maxRankColor: "bg-red-500 text-white",
-            };
-          }
-        })
-      );
+          })
+        );
 
-      updatedMembers.sort((a, b) => b.rating - a.rating);
-
-      setLeaderboardData(updatedMembers);
-      setLoading(false);
+        updatedMembers.sort((a, b) => b.rating - a.rating);
+        setLeaderboardData(updatedMembers);
+      } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchRatings();
@@ -111,12 +170,13 @@ const Leaderboard = () => {
             <tr className="bg-teal-500 text-white text-left">
               <th className="p-2 sm:p-4">Name</th>
               <th className="p-2 sm:p-4">Year</th>
-              <th className="p-2 sm:p-4">LeetCode</th>
+              <th className="p-2 sm:p-4">Leetcode</th>
               <th className="p-2 sm:p-4">CodeChef</th>
               <th className="p-2 sm:p-4">Codeforces</th>
-              <th className="p-2 sm:p-4">Rating</th>
+              <th className="p-2 sm:p-4">LeetCode Rating</th>
+              <th className="p-2 sm:p-4">Codeforces Rating</th>
               <th className="p-2 sm:p-4">Rank</th>
-              <th className="p-2 sm:p-4">Max Rank</th>
+              <th className="p-2 sm:p-4">Last 5 Contests Attendance</th>
             </tr>
           </thead>
           <tbody>
@@ -163,12 +223,19 @@ const Leaderboard = () => {
                     {member.cf_username}
                   </a>
                 </td>
+                <td className="p-2 sm:p-4 text-gray-800">
+                  {member.leetCodeRating}
+                </td>
                 <td className="p-2 sm:p-4 text-gray-800">{member.rating}</td>
                 <td className={`p-2 sm:p-4 capitalize ${member.rankColor}`}>
                   {member.rank}
                 </td>
-                <td className={`p-2 sm:p-4 capitalize ${member.maxRankColor}`}>
-                  {member.maxRank}
+                <td className="p-2 sm:p-4 flex space-x-2">
+                  {member.attendance.map((attended, i) => (
+                    <span key={i} className="text-lg">
+                      {attended ? "✅" : "❌"}
+                    </span>
+                  ))}
                 </td>
               </tr>
             ))}
@@ -178,5 +245,4 @@ const Leaderboard = () => {
     </div>
   );
 };
-
 export default Leaderboard;
