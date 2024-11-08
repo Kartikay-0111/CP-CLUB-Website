@@ -155,7 +155,7 @@ function MainLayout({ data }) {
               <p>Contests</p>
               <p className="text-sm cursor-pointer">See All</p>
             </div>
-            <ProfileContestTable data={data}/>
+            <ProfileContestTable data={data} />
           </div>
         </div>
 
@@ -198,7 +198,7 @@ function MainLayout({ data }) {
               <p className="text-sm">Contest Average Rating</p>
               <p className="text-lg">1504</p>
             </div>
-            <RatingChart />
+            <RatingChart data={data} />
           </div>
         </div>
       </div>
