@@ -52,7 +52,7 @@ const RatingChart = ({ data }) => {
         labels: lcDates.length > cfDates.length ? lcDates : cfDates,
         datasets: [
           {
-            label: "LeetCode Ratings",
+            label: "LeetCode Rating",
             data: lcRatings,
             // fill: true,
             // backgroundColor: lcGradient,
@@ -61,7 +61,7 @@ const RatingChart = ({ data }) => {
             tension: 0.4,
           },
           {
-            label: "Codeforces Ratings",
+            label: "Codeforces Rating",
             data: cfRatings,
             // fill: true,
             // backgroundColor: cfGradient,

@@ -11,19 +11,11 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchUserRating = async (cf_username, retries = 3) => {
-    const cachedData = localStorage.getItem(cf_username);
-    if (cachedData) {
-      return JSON.parse(cachedData);
-    }
-
     try {
       const response = await axios.get(
         `https://codeforces.com/api/user.info?handles=${cf_username}`
       );
-      const data = response.data.result[0];
-
-      localStorage.setItem(cf_username, JSON.stringify(data));
-      return data;
+      return response.data.result[0];
     } catch (error) {
       if (retries > 0 && error.response?.status === 503) {
         console.warn(
@@ -32,30 +24,18 @@ const Leaderboard = () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         return fetchUserRating(cf_username, retries - 1);
       } else {
-        console.error(`Error fetching rating for ${cf_username}:`, error);
         return null;
       }
     }
   };
 
   const fetchLeetCodeRating = async (lc_username) => {
-    const cachedData = localStorage.getItem(`lc_${lc_username}`);
-    if (cachedData) {
-      return JSON.parse(cachedData).leetcodeRating;
-    }
-
     try {
       const response = await axios.get(
         `https://leetcodeapi-v1.vercel.app/contest/${lc_username}`
       );
       const data = response.data.userContestDetails;
-
-      const leetcodeRating = data?.rating ? Math.floor(data.rating) : 0;
-      localStorage.setItem(
-        `lc_${lc_username}`,
-        JSON.stringify({ leetcodeRating })
-      );
-      return leetcodeRating;
+      return data?.rating ? Math.floor(data.rating) : 0;
     } catch (error) {
       return 0;
     }
@@ -67,11 +47,9 @@ const Leaderboard = () => {
         "https://codeforces.com/api/contest.list"
       );
       const contests = response.data.result;
-      const lastFiveContests = contests
+      return contests
         .filter((contest) => contest.phase === "FINISHED")
         .slice(0, 5);
-      //console.log(lastFiveContests);
-      return lastFiveContests;
     } catch (error) {
       console.error("Error fetching contests:", error);
       return [];
@@ -83,15 +61,13 @@ const Leaderboard = () => {
       const response = await axios.get(
         `https://codeforces.com/api/user.rating?handle=${cf_username}`
       );
-      const attendedContestIds = response.data.result.map(
-        (contest) => contest.contestId
-      );
-      //console.log(attendedContestIds);
+      const attendedContestIds = response.data.result
+        .map((contest) => contest.contestId)
+        .slice(-5);
 
-      const attendance = lastFiveContests.map((contest) =>
+      return lastFiveContests.map((contest) =>
         attendedContestIds.includes(contest.id)
       );
-      return attendance;
     } catch (error) {
       return [false, false, false, false, false];
     }
@@ -112,34 +88,36 @@ const Leaderboard = () => {
       const lastFiveContests = await fetchLastFiveContests();
 
       try {
-        const updatedMembers = await Promise.all(
-          Object.entries(members).map(async ([username, data]) => {
-            const cfData = await fetchUserRating(data.cf_username);
-            const leetCodeRating = await fetchLeetCodeRating(data.lc_username);
-            const attendance = await fetchUserAttendance(
-              data.cf_username,
-              lastFiveContests
-            );
+        const updatedMembers = [];
 
-            return {
-              ...data,
-              username: username,
-              rating: cfData.rating || 0,
-              maxRating: cfData.maxRating || 0,
-              rank: cfData.rank || "N/A",
-              maxRank: cfData.maxRank || "N/A",
-              titlePhoto:
-                cfData?.titlePhoto ||
-                "https://userpic.codeforces.org/no-title.jpg",
-              rankColor:
-                cfData?.rank === "N/A"
-                  ? "bg-red-500 text-white"
-                  : getRankColor(cfData.rating || 0),
-              leetCodeRating,
-              attendance,
-            };
-          })
-        );
+        for (const [username, data] of Object.entries(members)) {
+          const cfData = await fetchUserRating(data.cf_username);
+          const leetCodeRating = await fetchLeetCodeRating(data.lc_username);
+          const attendance = await fetchUserAttendance(
+            data.cf_username,
+            lastFiveContests
+          );
+
+          const memberData = {
+            ...data,
+            username: username,
+            rating: cfData?.rating || 0,
+            maxRating: cfData?.maxRating || 0,
+            rank: cfData?.rank || "N/A",
+            maxRank: cfData?.maxRank || "N/A",
+            titlePhoto:
+              cfData?.titlePhoto ||
+              "https://userpic.codeforces.org/no-title.jpg",
+            rankColor:
+              cfData?.rank === "N/A"
+                ? "bg-red-500 text-white"
+                : getRankColor(cfData.rating || 0),
+            leetCodeRating,
+            attendance,
+          };
+
+          updatedMembers.push(memberData);
+        }
 
         updatedMembers.sort((a, b) => b.rating - a.rating);
         setLeaderboardData(updatedMembers);
@@ -166,7 +144,8 @@ const Leaderboard = () => {
         <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-teal-500 text-white text-center">
-              <th className="p-2 pr-10 sm:p-4">Name</th>
+              <th className="p-2 sm:p-4">Sr No</th>
+              <th className="p-2  sm:p-4">Name</th>
               <th className="p-2 sm:p-4">Year</th>
               <th className="p-2 sm:p-4">Leetcode Rating</th>
               <th className="p-2 sm:p-4">Codeforces Rating</th>
@@ -180,6 +159,7 @@ const Leaderboard = () => {
                 key={index}
                 className="border-b hover:bg-gray-100 text-center"
               >
+                <td className="p-2 sm:p-4 text-gray-800">{index + 1}</td>
                 <td className="p-2 sm:p-4 text-gray-800">
                   <div className="flex ml-10">
                     <img
@@ -190,6 +170,7 @@ const Leaderboard = () => {
                     <Link
                       className="text-sm sm:text-base text-orange-800 hover:underline"
                       href={`profile/${member.username}`}
+                      target="_blank"
                     >
                       {member.name}
                     </Link>
