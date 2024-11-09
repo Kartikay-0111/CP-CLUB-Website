@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import members from "../json/members.json";
 import Link from "next/link";
-import { Check, CircleCheck, CircleX, X } from "lucide-react";
+import { CircleCheck, CircleX } from "lucide-react";
 
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -65,9 +65,10 @@ const Leaderboard = () => {
         .map((contest) => contest.contestId)
         .slice(-5);
 
-      return lastFiveContests.map((contest) =>
+      const attendance = lastFiveContests.map((contest) =>
         attendedContestIds.includes(contest.id)
       );
+      return attendance;
     } catch (error) {
       return [false, false, false, false, false];
     }
@@ -121,6 +122,9 @@ const Leaderboard = () => {
 
         updatedMembers.sort((a, b) => b.rating - a.rating);
         setLeaderboardData(updatedMembers);
+
+        // Store leaderboard data in localStorage without timestamp
+        localStorage.setItem("leaderboardData", JSON.stringify(updatedMembers));
       } catch (error) {
         console.error("Error fetching leaderboard data:", error);
       } finally {
@@ -128,7 +132,14 @@ const Leaderboard = () => {
       }
     };
 
-    fetchRatings();
+    // Check if leaderboard data is already in localStorage
+    const storedData = localStorage.getItem("leaderboardData");
+    if (storedData) {
+      setLeaderboardData(JSON.parse(storedData));
+      setLoading(false);
+    } else {
+      fetchRatings();
+    }
   }, []);
 
   if (loading) {
@@ -145,7 +156,7 @@ const Leaderboard = () => {
           <thead>
             <tr className="bg-teal-500 text-white text-center">
               <th className="p-2 sm:p-4">Sr No</th>
-              <th className="p-2  sm:p-4">Name</th>
+              <th className="p-2 sm:p-4">Name</th>
               <th className="p-2 sm:p-4">Year</th>
               <th className="p-2 sm:p-4">Leetcode Rating</th>
               <th className="p-2 sm:p-4">Codeforces Rating</th>
@@ -223,4 +234,5 @@ const Leaderboard = () => {
     </div>
   );
 };
+
 export default Leaderboard;
