@@ -18,6 +18,14 @@ const platformLogos = {
   geeksforgeeks: "https://upload.wikimedia.org/wikipedia/commons/4/43/GeeksforGeeks.svg"
 }
 
+const platformColors = {
+  codeforces: "bg-red-200 text-red-800",
+  leetcode: "bg-yellow-200 text-yellow-800",
+  codechef: "bg-purple-200 text-purple-800",
+  atcoder: "bg-blue-200 text-blue-800",
+  geeksforgeeks: "bg-green-200 text-green-800"
+}
+
 export default function Component() {
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [contests, setContests] = useState({ previous: [], upcoming: [] })
@@ -27,27 +35,27 @@ export default function Component() {
       try {
         const startDate = dayjs().subtract(3, 'months').startOf('day').toISOString()
         const endDate = dayjs().add(3, 'months').endOf('day').toISOString()
-  
+
         const response = await axios.get("https://node.codolio.com/api/contest-calendar/v1/all/get-contests", {
           params: { startDate, endDate }
         })
-  
+
         const allContests = response.data.data
           .filter(event => event.platform !== 'geeksforgeeks')
           .sort((a, b) => new Date(a.contestStartDate) - new Date(b.contestStartDate))
         
         const now = dayjs()
         const previousContests = allContests
-        .filter(contest => dayjs(contest.contestStartDate).isBefore(now))
-        .sort((a, b) => new Date(b.contestStartDate) - new Date(a.contestStartDate))
+          .filter(contest => dayjs(contest.contestStartDate).isBefore(now))
+          .sort((a, b) => new Date(b.contestStartDate) - new Date(a.contestStartDate))
         const upcomingContests = allContests.filter(contest => dayjs(contest.contestStartDate).isAfter(now))
-  
+
         setContests({ previous: previousContests, upcoming: upcomingContests })
       } catch (error) {
         console.error("Error fetching contests:", error)
       }
     }
-  
+
     fetchContests()
   }, [])
 
@@ -68,7 +76,7 @@ export default function Component() {
       .replace(/%20/g, '-')     
       .replace(/\s+/g, '-')      
       .toLowerCase();          
-  };
+  }
 
   const ContestList = ({ contests }) => (
     <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4">
@@ -88,7 +96,7 @@ export default function Component() {
                 {dayjs(event.contestStartDate).add(event.contestDuration, 'second').format("HH:mm")}
               </div>
               <div className="font-medium mt-1 flex items-center">
-                <span className="text-blue-600 font-semibold bg-blue-100 px-2 py-0.5 rounded-full mr-2 text-xs">
+                <span className={`text-blue-600 font-semibold bg-blue-100 px-2 py-0.5 rounded-full mr-2 text-xs ${platformColors[event.platform]}`}>
                   {event.platform.charAt(0).toUpperCase() + event.platform.slice(1)}
                 </span>
                 {event.contestName}
@@ -97,15 +105,15 @@ export default function Component() {
                 </Link>
                 {(event.platform === 'leetcode' || event.platform === 'codeforces') && dayjs(event.contestStartDate).isBefore(dayjs()) && (
                   <Link
-                  href={`/pastcontest?contestId=${event.contestCode}&contestName=${encodeURIComponent(formatContestName(event.contestName))}&platform=${event.platform}`}
-                  passHref
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="sm" className="ml-2">
-                    View Leaderboard
-                  </Button>
-                </Link> 
+                    href={`/pastcontest?contestId=${event.contestCode}&contestName=${encodeURIComponent(formatContestName(event.contestName))}&platform=${event.platform}`}
+                    passHref
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" size="sm" className="ml-2">
+                      View Leaderboard
+                    </Button>
+                  </Link>
                 )}
               </div>
             </div>
@@ -117,7 +125,7 @@ export default function Component() {
 
   return (
     <div className="max-w-7xl mx-auto p-4">
-      <div className="grid lg:grid-cols-[1fr,1fr] gap-8">
+      <div className="grid lg:grid-cols-[2fr,3fr] gap-8">
         <div className="space-y-6">
           <Tabs defaultValue="upcoming" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -166,22 +174,27 @@ export default function Component() {
               return (
                 <div
                   key={day}
-                  className={`aspect-square p-1 border rounded-lg hover:bg-gray-50 transition-colors ${
+                  className={`aspect-square p-2 border rounded-lg hover:bg-gray-50 transition-colors ${
                     events ? 'bg-blue-100' : ''
                   } ${currentDate.date() === day ? 'ring-2 ring-blue-500' : ''}`}
                 >
-                  <div className="text-sm text-gray-600">{day}</div>
+                  <div className="text-center text-gray-800 font-semibold text-lg">{day}</div>
                   {events && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {events.map((event, i) => (
-                        <Link key={i} href={event.contestUrl} target="_blank" rel="noopener noreferrer">
-                          <Image
-                            src={platformLogos[event.platform]}
-                            alt={event.platform}
-                            width={16}
-                            height={16}
-                            className="rounded-full"
-                          />
+                    <div className="flex flex-col gap-1 mt-2">
+                      {events.map((event, index) => (
+                        <Link
+                          key={index}
+                          href={event.contestUrl}
+                          passHref
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <div
+                            className={`text-xs px-2 py-1 rounded-full ${platformColors[event.platform]} overflow-hidden whitespace-nowrap text-ellipsis`}
+                            title={event.contestName}
+                          >
+                            {event.platform}
+                          </div>
                         </Link>
                       ))}
                     </div>
