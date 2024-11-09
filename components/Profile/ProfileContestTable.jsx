@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 
 const ProfileContestTable = ({data}) => {
   const [contests, setContests] = useState([]);
@@ -37,6 +38,12 @@ const ProfileContestTable = ({data}) => {
     indexOfFirstItem + itemsPerPage
   );
 
+  const formatContestName = (name) => {
+    return name.toLowerCase().replace(/\s+/g, '-').concat('/');
+  };
+
+  console.log(currentContests);
+
   return (
     <div>
       {!contests || contests.length !== 0 ? (
@@ -72,7 +79,23 @@ const ProfileContestTable = ({data}) => {
                           alt="abcd"
                         />
                       )}
-                      <p>{contest.contestName} </p>
+                      {contest.platform === "LeetCode" ? (
+                        <Link
+                          href={`https://leetcode.com/contest/${formatContestName(contest.contestName)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <p>{contest.contestName} </p>
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`https://codeforces.com/contest/${contest.contestId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <p>{contest.contestName} </p>
+                        </Link>
+                      )}
                     </div>
                   </td>
                   <td className="py-4 text-sm text-gray-700">
