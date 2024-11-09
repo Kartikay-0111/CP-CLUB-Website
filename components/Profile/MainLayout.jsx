@@ -161,7 +161,7 @@ function MainLayout({ data }) {
   const topData = [
     {
       image: "/svgs/puzzle.svg",
-      title: "Codeforces Questions",
+      title: "Contest Questions",
       count: data.codeForcesData?.problemsSolvedCount ?? 0,
     },
     {
