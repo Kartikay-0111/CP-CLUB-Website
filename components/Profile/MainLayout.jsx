@@ -260,7 +260,7 @@ function MainLayout({ data }) {
 
           {/* Rating chart section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <RatingChart data={data?.codeForcesData?.ratingData} />
+            <RatingChart data={data} />
           </div>
 
           {/* Topic Analysis section */}

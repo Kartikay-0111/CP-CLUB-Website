@@ -3,77 +3,87 @@ import React, { useRef, useEffect, useState } from "react";
 import { Chart } from "chart.js/auto";
 
 const RatingChart = ({ data }) => {
-  const [contests, setContests] = useState([]);
-  const [ratings, setRatings] = useState([]);
-  const [ranks, setRanks] = useState([]);
-  const [dates, setDates] = useState([]);
-  const [ratingAvg, setRatingAvg] = useState(0);
+  const [lcDates, setLcDates] = useState([]);
+  const [lcRatings, setLcRatings] = useState([]);
+  const [cfDates, setCfDates] = useState([]);
+  const [cfRatings, setCfRatings] = useState([]);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    if (data && data.mergedContests) {
-      setContests(data.mergedContests);
+    if (data.contestsData?.leetCodeContestsData?.length > 0) {
+      const sortedLcData = data.contestsData.leetCodeContestsData.sort(
+        (a, b) => a.startTime - b.startTime
+      );
+      setLcDates(
+        sortedLcData.map((item) => formatDate(item.contest.startTime))
+      );
+      setLcRatings(sortedLcData.map((item) => item.rating));
     }
-    //console.log(data);
+
+    if (data.contestsData?.codeForcesContestsData?.length > 0) {
+      const sortedCfData = data.contestsData.codeForcesContestsData.sort(
+        (a, b) => a.ratingUpdateTimeSeconds - b.ratingUpdateTimeSeconds
+      );
+      setCfDates(
+        sortedCfData.map((item) => formatDate(item.ratingUpdateTimeSeconds))
+      );
+      setCfRatings(sortedCfData.map((item) => item.newRating));
+    }
   }, [data]);
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000);
-    return date.toLocaleString();
+    return date.toLocaleDateString();
   };
 
   useEffect(() => {
-    if (contests.length > 0) {
-      const sortedContests = contests.sort((a, b) => a.startTime - b.startTime);
-      setRanks(sortedContests.map((item) => item.rank));
-      setRatings(sortedContests.map((item) => item.newRating));
-      setDates(
-        sortedContests.map((item) =>
-          formatDate(item.startTime).substring(0, 10)
-        )
-      );
-    }
-  }, [contests]);
-
-  useEffect(() => {
-    if (ratings.length > 0 && dates.length > 0) {
-      let avg = (
-        ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length
-      ).toFixed(2);
-      setRatingAvg(avg);
-
+    if (lcRatings.length > 0 || cfRatings.length > 0) {
       const ctx = chartRef.current.getContext("2d");
 
-      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient.addColorStop(0, "rgb(121, 178, 250, 0.7)");
-      gradient.addColorStop(1, "rgb(121, 178, 250, 0)");
+      const lcGradient = ctx.createLinearGradient(0, 0, 0, 400);
+      lcGradient.addColorStop(0, "rgba(121, 178, 250, 0.7)");
+      lcGradient.addColorStop(1, "rgba(121, 178, 250, 0)");
 
-      const data = {
-        labels: dates,
+      const cfGradient = ctx.createLinearGradient(0, 0, 0, 400);
+      cfGradient.addColorStop(0, "rgba(255, 99, 132, 0.7)");
+      cfGradient.addColorStop(1, "rgba(255, 99, 132, 0)");
+
+      const chartData = {
+        labels: lcDates.length > cfDates.length ? lcDates : cfDates,
         datasets: [
           {
-            label: "Ranks",
-            data: ranks,
-            fill: true,
-            backgroundColor: gradient,
-            borderColor: "rgb(121,178,250,1)",
+            label: "LeetCode Ratings",
+            data: lcRatings,
+            // fill: true,
+            // backgroundColor: lcGradient,
+            borderColor: "rgba(121, 178, 250, 1)",
+            borderWidth: 2,
+            tension: 0.4,
+          },
+          {
+            label: "Codeforces Ratings",
+            data: cfRatings,
+            // fill: true,
+            // backgroundColor: cfGradient,
+            borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 2,
             tension: 0.4,
           },
         ],
       };
 
-      const options = {
+      const chartOptions = {
         responsive: true,
         maintainAspectRatio: true,
         plugins: {
           tooltip: {
             callbacks: {
-              label: (tooltipItem) => `Ranks: ${tooltipItem.raw}`,
+              label: (tooltipItem) =>
+                `${tooltipItem.dataset.label}: ${tooltipItem.raw}`,
             },
           },
           legend: {
-            display: false,
+            display: true,
           },
         },
         scales: {
@@ -81,10 +91,15 @@ const RatingChart = ({ data }) => {
             display: false,
           },
           y: {
-            min: Math.min(...ranks),
-            max: Math.max(...ranks),
+            title: { display: true, text: "Rating" },
+            min: Math.min(
+              ...lcRatings.concat(cfRatings).filter((v) => v != null)
+            ),
+            max: Math.max(
+              ...lcRatings.concat(cfRatings).filter((v) => v != null)
+            ),
             ticks: {
-              stepSize: 20,
+              stepSize: 50,
             },
           },
         },
@@ -92,13 +107,13 @@ const RatingChart = ({ data }) => {
 
       const myChart = new Chart(ctx, {
         type: "line",
-        data: data,
-        options: options,
+        data: chartData,
+        options: chartOptions,
       });
 
       return () => myChart.destroy();
     }
-  }, [ranks, ratings, dates]);
+  }, [lcRatings, cfRatings, lcDates, cfDates]);
 
   return (
     <div
@@ -109,10 +124,11 @@ const RatingChart = ({ data }) => {
         textAlign: "start",
         overflow: "hidden",
       }}
+      // className="h-fit"
     >
       <div>
-        <p className="text-sm">Contest Average Rating</p>
-        <p className="text-lg">{ratingAvg}</p>
+        <p className="text-sm">Contests Rating</p>
+        <p>{data.mergedContests?.length === 0 && "No Contests Data"}</p>
       </div>
       <div style={{ width: "100%" }}>
         <canvas ref={chartRef}></canvas>
