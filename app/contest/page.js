@@ -71,13 +71,6 @@ export default function Component() {
     return acc
   }, {})
 
-  const formatContestName = (contestName) => {
-    return contestName
-      .replace(/%20/g, '-')     
-      .replace(/\s+/g, '-')      
-      .toLowerCase();          
-  }
-
   const ContestList = ({ contests }) => (
     <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4">
       {contests.map((event, index) => (
@@ -105,7 +98,7 @@ export default function Component() {
                 </Link>
                 {(event.platform === 'leetcode' || event.platform === 'codeforces') && dayjs(event.contestStartDate).isBefore(dayjs()) && (
                   <Link
-                    href={`/pastcontest?contestId=${event.contestCode}&contestName=${encodeURIComponent(formatContestName(event.contestName))}&platform=${event.platform}`}
+                    href={`/pastcontest?contestId=${event.contestCode}&contestName=${encodeURIComponent(event.contestName)}&platform=${event.platform}`}
                     passHref
                     target="_blank"
                     rel="noopener noreferrer"

@@ -3,8 +3,41 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+async function fetchContestRankingHistory(username) {
+    const query = `
+        query userContestRankingInfo($username: String!) {
+            userContestRankingHistory(username: $username) {
+                attended
+                ranking
+                contest {
+                    title
+                    startTime
+                }
+            }
+        }
+    `;
+    
+    const variables = { username };
+
+    try {
+        const response = await axios.post("https://leetcode.com/graphql", {
+            query: query,
+            variables: variables
+        });
+
+        if (response.data.data.userContestRankingHistory) {
+            return response.data.data.userContestRankingHistory.map(contest => ({
+                ranking: contest.ranking,
+                contestTitle: contest.contest.title,
+                contestStartTime: contest.contest.startTime
+            }));
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error(`Error fetching contest data for ${username}:`, error.message);
+        return null;
+    }
 }
 
 export async function GET(req) {
@@ -30,36 +63,24 @@ export async function GET(req) {
         const handle = userHandles[i];
         const user = Object.values(users).find(u => u.lc_username === handle);
 
-        try {
-            const params = new URLSearchParams({
-                contest_name: contestName,
-                username: handle,
-                archived: 'false'
-            });
+        const contestData = await fetchContestRankingHistory(handle);
 
-            const response = await axios.get(`https://lccn.lbao.site/api/v1/contest-records/user?${params.toString()}`);
+        if (contestData && contestData.length > 0) {
+            const filteredContestData = contestData.filter(contest => 
+                contest.contestTitle.toLowerCase().includes(contestName.toLowerCase()) && contest.ranking !== 0
+            );
 
-            if (Array.isArray(response.data) && response.data.length > 0) {
-                const topResult = response.data[0]; 
-
+            if (filteredContestData.length > 0) {
                 results.push({
-                    name: user.name,
+                    name: user.name, 
                     handle,
-                    standing: topResult.rank
+                    standing: filteredContestData[0].ranking  
                 });
-            } else {
-                results.push(null);
             }
-        } catch (error) {
-            console.error(`Failed to fetch data for handle ${handle}:`, error.message);
-        }
-        if (i < userHandles.length - 1) {
-            console.log(`Waiting for 2 seconds before the next request...`);
-            await delay(2000);
         }
     }
 
-    const filteredResults = results.filter(result => result !== null);
+    const filteredResults = results.filter(result => result.standing !== undefined);
 
     return NextResponse.json(filteredResults);
 }
