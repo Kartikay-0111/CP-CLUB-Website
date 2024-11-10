@@ -6,6 +6,8 @@ import members from "../json/members.json";
 import Link from "next/link";
 import { CircleCheck, CircleX } from "lucide-react";
 
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,109 +62,100 @@ const Leaderboard = () => {
     return "bg-gray-500 text-white";
   };
 
-  useEffect(() => {
-    const handles = [
-      "hewhocodes",
-      "sohamrane301",
-      "amalverma",
-      "Sid_7905",
-      "AsIfThatWouldEverHappen",
-      "jay_patil",
-      "Nilanshu_Ranjan_101",
-      "RushabhMehta2005",
-      "Kavya-r30",
-      "NOOBPOOK",
-      "ghruank",
-      "ahaan_desai27",
-      "PiyushShrey",
-      "drkshah27",
-      "shipras1304",
-      "sameersalunke05",
-      "Chef-KTK",
-      "ShreyDudie",
-      "Awwab_coder123",
-      "straycode17",
-      "anushkaryadav03",
-      "Purvasha",
-    ];
+  const fetchRatingsAndAttendance = async () => {
+    const handles = Object.keys(members).map(
+      (member) => members[member].cf_username
+    );
+    setLoading(true);
+    const lastFiveContests = await fetchLastFiveContests();
 
-    const fetchRatingsAndAttendance = async () => {
-      setLoading(true);
-      const lastFiveContests = await fetchLastFiveContests();
+    try {
+      const attendanceMap = handles.reduce((acc, handle) => {
+        acc[handle] = [false, false, false, false, false];
+        return acc;
+      }, {});
 
-      try {
-        // Fetch attendance data for each contest
-        const attendanceMap = handles.reduce((acc, handle) => {
-          acc[handle] = [false, false, false, false, false];
-          return acc;
-        }, {});
+      for (const contestId of lastFiveContests) {
+        const response = await axios.get(
+          `https://codeforces.com/api/contest.standings?contestId=${contestId}&handles=${handles.join(
+            ";"
+          )}&showUnofficial=false`
+        );
 
-        for (const contestId of lastFiveContests) {
-          const response = await axios.get(
-            `https://codeforces.com/api/contest.standings?contestId=${contestId}&handles=${handles.join(
-              ";"
-            )}&showUnofficial=false`
-          );
-
-          response.data.result.rows.forEach((row) => {
-            const handle = row.party.members[0].handle;
-            const contestIndex = lastFiveContests.indexOf(contestId);
-            if (attendanceMap[handle]) {
-              attendanceMap[handle][contestIndex] = true;
-            }
-          });
-        }
-
-        setAttendanceMap(attendanceMap);
-
-        const cfRatings = await fetchUserRatings(handles);
-        const updatedMembers = [];
-
-        for (const [username, data] of Object.entries(members)) {
-          const cfData = cfRatings.find(
-            (user) => user.handle === data.cf_username
-          );
-          const leetCodeRating = await fetchLeetCodeRating(data.lc_username);
-
-          const memberData = {
-            ...data,
-            username: username,
-            rating: cfData?.rating || 0,
-            maxRating: cfData?.maxRating || 0,
-            rank: cfData?.rank || "N/A",
-            maxRank: cfData?.maxRank || "N/A",
-            titlePhoto:
-              cfData?.titlePhoto ||
-              "https://userpic.codeforces.org/no-title.jpg",
-            rankColor:
-              cfData?.rank === "N/A"
-                ? "bg-red-500 text-white"
-                : getRankColor(cfData.rating || 0),
-            leetCodeRating,
-            attendance: attendanceMap[data.cf_username] || [
-              false,
-              false,
-              false,
-              false,
-              false,
-            ],
-          };
-
-          updatedMembers.push(memberData);
-        }
-
-        updatedMembers.sort((a, b) => b.rating - a.rating);
-        setLeaderboardData(updatedMembers);
-
-        localStorage.setItem("leaderboardData", JSON.stringify(updatedMembers));
-      } catch (error) {
-        console.error("Error fetching leaderboard data:", error);
-      } finally {
-        setLoading(false);
+        response.data.result.rows.forEach((row) => {
+          const handle = row.party.members[0].handle;
+          const contestIndex = lastFiveContests.indexOf(contestId);
+          if (attendanceMap[handle]) {
+            attendanceMap[handle][contestIndex] = true;
+          }
+        });
       }
-    };
 
-    fetchRatingsAndAttendance();
+      setAttendanceMap(attendanceMap);
+
+      const cfRatings = await fetchUserRatings(handles);
+      const updatedMembers = [];
+
+      for (const [username, data] of Object.entries(members)) {
+        const cfData = cfRatings.find(
+          (user) => user.handle === data.cf_username
+        );
+        const leetCodeRating = await fetchLeetCodeRating(data.lc_username);
+
+        const memberData = {
+          ...data,
+          username: username,
+          rating: cfData?.rating || 0,
+          maxRating: cfData?.maxRating || 0,
+          rank: cfData?.rank || "N/A",
+          maxRank: cfData?.maxRank || "N/A",
+          titlePhoto:
+            cfData?.titlePhoto || "https://userpic.codeforces.org/no-title.jpg",
+          rankColor:
+            cfData?.rank === "N/A"
+              ? "bg-red-500 text-white"
+              : getRankColor(cfData.rating || 0),
+          leetCodeRating,
+          attendance: attendanceMap[data.cf_username] || [
+            false,
+            false,
+            false,
+            false,
+            false,
+          ],
+        };
+
+        updatedMembers.push(memberData);
+      }
+
+      updatedMembers.sort((a, b) => b.rating - a.rating);
+      setLeaderboardData(updatedMembers);
+
+      const cachedData = {
+        data: updatedMembers,
+        attendanceMap,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem("leaderboardData", JSON.stringify(cachedData));
+    } catch (error) {
+      console.error("Error fetching leaderboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const cachedData = JSON.parse(localStorage.getItem("leaderboardData"));
+    const isCacheValid =
+      cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION;
+
+    if (isCacheValid) {
+      setLeaderboardData(cachedData.data);
+      setAttendanceMap(cachedData.attendanceMap);
+      setLoading(false);
+    } else {
+      fetchRatingsAndAttendance();
+    }
   }, []);
 
   if (loading) {
