@@ -25,15 +25,14 @@ const Leaderboard = () => {
     }
   };
 
+  // Modified function to fetch LeetCode rating from the newly created API
   const fetchLeetCodeRating = async (lc_username) => {
     try {
-      const response = await axios.get(
-        `https://leetcodeapi-v1.vercel.app/contest/${lc_username}`
-      );
-      const data = response.data.userContestDetails;
-      return data?.rating ? Math.floor(data.rating) : 0;
+      const response = await axios.get(`/api/lcrating?username=${lc_username}`);
+      return response.data?.rating || null; // assuming the response has a 'rating' field
     } catch (error) {
-      return 0;
+      console.error("Error fetching LeetCode rating:", error);
+      return null;
     }
   };
 
@@ -115,7 +114,7 @@ const Leaderboard = () => {
             cfData?.rank === "N/A"
               ? "bg-red-500 text-white"
               : getRankColor(cfData.rating || 0),
-          leetCodeRating,
+          leetCodeRating: leetCodeRating || 0,
           attendance: attendanceMap[data.cf_username] || [
             false,
             false,
