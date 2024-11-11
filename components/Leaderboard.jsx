@@ -26,13 +26,28 @@ const Leaderboard = () => {
   };
 
   // Modified function to fetch LeetCode rating from the newly created API
-  const fetchLeetCodeRating = async (lc_username) => {
+  // const fetchLeetCodeRating = async (lc_username) => {
+  //   try {
+  //     const response = await axios.get(`/api/lcrating?username=${lc_username}`);
+  //     return response.data?.rating || null; // assuming the response has a 'rating' field
+  //   } catch (error) {
+  //     console.error("Error fetching LeetCode rating:", error);
+  //     return null;
+  //   }
+  // };
+  
+
+  const fetchLeetCodeRating = async () => {
     try {
-      const response = await axios.get(`/api/lcrating?username=${lc_username}`);
-      return response.data?.rating || null; // assuming the response has a 'rating' field
+      const response = await axios.get("/api/lcrating");
+      // Sort the users by rating in descending order
+      const sortedData = response.data.sort((a, b) => b.rating - a.rating);
+      return sortedData;
     } catch (error) {
-      console.error("Error fetching LeetCode rating:", error);
-      return null;
+      console.log("Error fetching leaderboard data:", error);
+      setError("Failed to load leaderboard data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,6 +89,12 @@ const Leaderboard = () => {
         return acc;
       }, {});
 
+        const leetCodeRating = await fetchLeetCodeRating();
+
+        console.log(leetCodeRating);
+        
+
+
       for (const contestId of lastFiveContests) {
         const response = await axios.get(
           `https://codeforces.com/api/contest.standings?contestId=${contestId}&handles=${handles.join(
@@ -98,8 +119,7 @@ const Leaderboard = () => {
       for (const [username, data] of Object.entries(members)) {
         const cfData = cfRatings.find(
           (user) => user.handle === data.cf_username
-        );
-        const leetCodeRating = await fetchLeetCodeRating(data.lc_username);
+        );        
 
         const memberData = {
           ...data,
@@ -114,7 +134,9 @@ const Leaderboard = () => {
             cfData?.rank === "N/A"
               ? "bg-red-500 text-white"
               : getRankColor(cfData.rating || 0),
-          leetCodeRating: leetCodeRating || 0,
+          leetCodeRating:
+            leetCodeRating.find((item) => item.username === data.lc_username)?.rating ||
+            0,
           attendance: attendanceMap[data.cf_username] || [
             false,
             false,

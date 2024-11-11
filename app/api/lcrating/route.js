@@ -1,5 +1,7 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 // Function to fetch the LeetCode rating for a given username
 async function fetchLCRating(username) {
@@ -20,6 +22,8 @@ async function fetchLCRating(username) {
       { timeout: 5000 } // 5-second timeout for the API request
     );
 
+    console.log("API response data:", response.data); // Log full response for debugging
+
     if (response.data?.data?.userContestRanking?.rating) {
       return Math.round(response.data.data.userContestRanking.rating);
     } else {
@@ -33,23 +37,37 @@ async function fetchLCRating(username) {
 
 export async function GET(req) {
   const url = new URL(req.url);
-  const username = url.searchParams.get("username");
+  console.log("jdjdhj");
 
-  // If no username is provided, return an error
-  if (!username) {
+  // Load the user list from the JSON file
+  const filePath = path.resolve(process.cwd(), "json/members.json");
+  let users;
+
+  try {
+    const data = fs.readFileSync(filePath, "utf-8");
+    users = JSON.parse(data);
+  } catch (error) {
+    console.error("Error reading JSON file:", error);
     return NextResponse.json(
-      { error: "Username parameter is required" },
-      { status: 400 }
+      { error: "Failed to read users file" },
+      { status: 500 }
     );
   }
 
-  // Fetch the LeetCode rating for the specified username
-  const rating = await fetchLCRating(username);
+  // Collect usernames from the JSON file
+  const userHandles = Object.values(users).map((user) => user.lc_username);
 
-  // Return the rating if available, else return null
-  if (rating !== null) {
-    return NextResponse.json({ rating });
-  } else {
-    return NextResponse.json({ rating: null });
-  }
+  // Fetch LeetCode ratings for all users in parallel
+  const ratingPromises = userHandles.map((handle) =>
+    fetchLCRating(handle).then((rating) => ({
+      username: handle,
+      rating,
+    }))
+  );
+
+  // Await all promises and get the results
+  const ratings = await Promise.all(ratingPromises);
+
+  // Return the ratings in the response
+  return NextResponse.json(ratings);
 }
