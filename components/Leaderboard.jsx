@@ -5,6 +5,7 @@ import axios from "axios";
 import members from "../json/members.json";
 import Link from "next/link";
 import { CircleCheck, CircleX } from "lucide-react";
+import { LeaderboardSkeleton } from "./Skeleton";
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
@@ -158,7 +159,7 @@ const Leaderboard = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-xl">Loading Stats...</div>;
+    return <LeaderboardSkeleton />;
   }
 
   return (
@@ -196,7 +197,7 @@ const Leaderboard = () => {
                     <Link
                       className="text-sm sm:text-base text-orange-800 hover:underline"
                       href={`profile/${member.username}`}
-                      target="_blank"
+                      // target="_blank"
                     >
                       {member.name}
                     </Link>
