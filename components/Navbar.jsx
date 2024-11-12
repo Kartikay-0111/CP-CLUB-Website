@@ -16,7 +16,7 @@ const Navbar = () => {
         {/* <div className="text-white text-2xl font-semibold">CP Club</div> */}
         <div className="flex flex-row items-center text-white text-2xl font-semibold">
           <img
-            src={"/images/cplogo2s.png"}
+            src={"/images/cplogo2.png"}
             width="0"
             height="0"
             className="w-14 h-10 rounded-full cursor-pointer"
