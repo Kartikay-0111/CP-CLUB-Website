@@ -26,26 +26,13 @@ const Leaderboard = () => {
     }
   };
 
-  // Modified function to fetch LeetCode rating from the newly created API
-  // const fetchLeetCodeRating = async (lc_username) => {
-  //   try {
-  //     const response = await axios.get(`/api/lcrating?username=${lc_username}`);
-  //     return response.data?.rating || null; // assuming the response has a 'rating' field
-  //   } catch (error) {
-  //     console.error("Error fetching LeetCode rating:", error);
-  //     return null;
-  //   }
-  // };
-
   const fetchLeetCodeRating = async () => {
     try {
       const response = await axios.get("/api/lcrating");
-      // Sort the users by rating in descending order
       const sortedData = response.data.sort((a, b) => b.rating - a.rating);
       return sortedData;
     } catch (error) {
       console.log("Error fetching leaderboard data:", error);
-      setError("Failed to load leaderboard data");
     }
   };
 
@@ -88,8 +75,6 @@ const Leaderboard = () => {
       }, {});
 
       const leetCodeRating = await fetchLeetCodeRating();
-
-      console.log(leetCodeRating);
 
       for (const contestId of lastFiveContests) {
         const response = await axios.get(
@@ -154,6 +139,7 @@ const Leaderboard = () => {
         timestamp: Date.now(),
       };
       localStorage.setItem("leaderboardData", JSON.stringify(cachedData));
+      localStorage.setItem("lastClearDateIST", new Date().toISOString());
     } catch (error) {
       console.error("Error fetching leaderboard data:", error);
     } finally {
@@ -162,6 +148,24 @@ const Leaderboard = () => {
   };
 
   useEffect(() => {
+    const checkForMidnightIST = () => {
+      const now = new Date();
+      const istOffset = 330; // IST is UTC+5:30
+      const istNow = new Date(now.getTime() + istOffset * 60 * 1000);
+
+      const currentHour = istNow.getUTCHours();
+      const currentMinute = istNow.getUTCMinutes();
+
+      // Check if it's exactly 12:00 AM IST and clear the storage
+      if (currentHour === 0 && currentMinute === 0) {
+        localStorage.removeItem("leaderboardData");
+        localStorage.setItem("lastClearDateIST", new Date().toISOString());
+      }
+    };
+
+    // Set an interval to check the time every minute
+    const intervalId = setInterval(checkForMidnightIST, 60000);
+
     const cachedData = JSON.parse(localStorage.getItem("leaderboardData"));
     const isCacheValid =
       cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION;
@@ -173,6 +177,8 @@ const Leaderboard = () => {
     } else {
       fetchRatingsAndAttendance();
     }
+
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {
@@ -214,7 +220,6 @@ const Leaderboard = () => {
                     <Link
                       className="text-sm sm:text-base text-orange-800 hover:underline"
                       href={`profile/${member.username}`}
-                      // target="_blank"
                     >
                       {member.name}
                     </Link>
@@ -226,7 +231,7 @@ const Leaderboard = () => {
                     href={`https://leetcode.com/${member.lc_username}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:underline text-sm sm:text-base"
+                    className="hover:underline text-sm sm:text-base text-orange-800"
                   >
                     {member.leetCodeRating}
                   </a>
