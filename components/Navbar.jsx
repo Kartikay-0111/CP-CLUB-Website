@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,17 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-800 sticky top-0 z-50 shadow-lg h-16">
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center pt-4">
-        <div className="text-white text-2xl font-semibold">CP Club</div>
+        {/* <div className="text-white text-2xl font-semibold">CP Club</div> */}
+        <div className="text-white text-2xl font-semibold">
+          <img
+            src={"/images/CP_logo.png"}
+            width="0"
+            height="0"
+            className="w-10  h-10 rounded-full cursor-pointer"
+            quality={10}
+            onClick={() => window.location.reload()}
+          />
+        </div>
 
         <div className="hidden md:flex space-x-6">
           <Link
