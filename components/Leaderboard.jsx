@@ -36,7 +36,6 @@ const Leaderboard = () => {
   //     return null;
   //   }
   // };
-  
 
   const fetchLeetCodeRating = async () => {
     try {
@@ -47,8 +46,6 @@ const Leaderboard = () => {
     } catch (error) {
       console.log("Error fetching leaderboard data:", error);
       setError("Failed to load leaderboard data");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -90,11 +87,9 @@ const Leaderboard = () => {
         return acc;
       }, {});
 
-        const leetCodeRating = await fetchLeetCodeRating();
+      const leetCodeRating = await fetchLeetCodeRating();
 
-        console.log(leetCodeRating);
-        
-
+      console.log(leetCodeRating);
 
       for (const contestId of lastFiveContests) {
         const response = await axios.get(
@@ -120,7 +115,7 @@ const Leaderboard = () => {
       for (const [username, data] of Object.entries(members)) {
         const cfData = cfRatings.find(
           (user) => user.handle === data.cf_username
-        );        
+        );
 
         const memberData = {
           ...data,
@@ -136,8 +131,8 @@ const Leaderboard = () => {
               ? "bg-red-500 text-white"
               : getRankColor(cfData.rating || 0),
           leetCodeRating:
-            leetCodeRating.find((item) => item.username === data.lc_username)?.rating ||
-            0,
+            leetCodeRating.find((item) => item.username === data.lc_username)
+              ?.rating || 0,
           attendance: attendanceMap[data.cf_username] || [
             false,
             false,
