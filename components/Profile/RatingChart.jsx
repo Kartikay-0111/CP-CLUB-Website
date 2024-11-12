@@ -18,6 +18,9 @@ const RatingChart = ({ data }) => {
         sortedLcData.map((item) => formatDate(item.contest.startTime))
       );
       setLcRatings(sortedLcData.map((item) => item.rating));
+    } else {
+      setLcDates([]);
+      setLcRatings([]);
     }
 
     if (data.contestsData?.codeForcesContestsData?.length > 0) {
@@ -28,6 +31,9 @@ const RatingChart = ({ data }) => {
         sortedCfData.map((item) => formatDate(item.ratingUpdateTimeSeconds))
       );
       setCfRatings(sortedCfData.map((item) => item.newRating));
+    } else {
+      setCfDates([]);
+      setCfRatings([]);
     }
   }, [data]);
 
@@ -37,6 +43,8 @@ const RatingChart = ({ data }) => {
   };
 
   useEffect(() => {
+    console.log(chartRef.current);
+
     if (lcRatings.length > 0 || cfRatings.length > 0) {
       const ctx = chartRef.current.getContext("2d");
 
@@ -48,28 +56,30 @@ const RatingChart = ({ data }) => {
       cfGradient.addColorStop(0, "rgba(255, 99, 132, 0.7)");
       cfGradient.addColorStop(1, "rgba(255, 99, 132, 0)");
 
+      const labels = lcDates.length > cfDates.length ? lcDates : cfDates;
+
       const chartData = {
-        labels: lcDates.length > cfDates.length ? lcDates : cfDates,
+        labels,
         datasets: [
-          {
+          lcRatings.length > 0 && {
             label: "LeetCode Rating",
             data: lcRatings,
             // fill: true,
-            // backgroundColor: lcGradient,
+            backgroundColor: lcGradient,
             borderColor: "rgba(121, 178, 250, 1)",
             borderWidth: 2,
             tension: 0.4,
           },
-          {
+          cfRatings.length > 0 && {
             label: "Codeforces Rating",
             data: cfRatings,
             // fill: true,
-            // backgroundColor: cfGradient,
+            backgroundColor: cfGradient,
             borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 2,
             tension: 0.4,
           },
-        ],
+        ].filter(Boolean), // Filters out any empty datasets
       };
 
       const chartOptions = {
@@ -92,12 +102,19 @@ const RatingChart = ({ data }) => {
           },
           y: {
             title: { display: true, text: "Rating" },
-            min: Math.min(
-              ...lcRatings.concat(cfRatings).filter((v) => v != null)
-            ),
-            max: Math.max(
-              ...lcRatings.concat(cfRatings).filter((v) => v != null)
-            ),
+            min:
+              Math.min(
+                ...lcRatings.concat(cfRatings).filter((v) => v != null)
+              ) ===
+              Math.max(...lcRatings.concat(cfRatings).filter((v) => v != null))
+                ? 0
+                : Math.min(
+                    ...lcRatings.concat(cfRatings).filter((v) => v != null)
+                  ),
+            max:
+              Math.max(
+                ...lcRatings.concat(cfRatings).filter((v) => v != null)
+              ) + 300,
             ticks: {
               stepSize: 50,
             },
@@ -123,16 +140,23 @@ const RatingChart = ({ data }) => {
         margin: "0 auto",
         textAlign: "start",
         overflow: "hidden",
+        height: "100%",
       }}
-      // className="h-fit"
     >
       <div>
         <p className="text-sm">Contests Rating</p>
-        <p>{data.mergedContests?.length === 0 && "No Contests Data"}</p>
+        <p className="text-gray-500 mt-2">
+          {data.contestsData?.leetCodeContestsData?.length === 0 &&
+            data.contestsData?.codeForcesContestsData?.length === 0 &&
+            "No Contests Data"}
+        </p>
       </div>
-      <div style={{ width: "100%" }}>
-        <canvas ref={chartRef}></canvas>
-      </div>
+      {(data.contestsData?.leetCodeContestsData?.length > 0 ||
+        data.contestsData?.codeForcesContestsData?.length > 0) && (
+        <div style={{ width: "100%" }}>
+          <canvas ref={chartRef}></canvas>
+        </div>
+      )}
     </div>
   );
 };

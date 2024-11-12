@@ -8,7 +8,7 @@ const ProfileSidebar = ({ data }) => {
     {
       image: "/svgs/cf.svg",
       platform: "Codeforces",
-      rating: data.codeForcesData?.rating,
+      rating: data.codeForcesData?.rating ?? 0,
     },
     {
       image: "/svgs/lc.svg",
