@@ -157,7 +157,7 @@ const Leaderboard = () => {
       const currentMinute = istNow.getUTCMinutes();
 
       // Check if it's exactly 12:00 AM IST and clear the storage
-      if (currentHour === 1 && currentMinute === 25) {
+      if (currentHour === 0 && currentMinute === 0) {
         localStorage.removeItem("leaderboardData");
         localStorage.setItem("lastClearDateIST", new Date().toISOString());
       }
