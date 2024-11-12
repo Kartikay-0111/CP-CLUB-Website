@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Medal } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { ContestTableSkeleton } from "@/components/Skeleton";
+import Link from "next/link";
 
 const platformLogos = {
   codeforces:
@@ -142,8 +143,10 @@ function ContestLeaderboardContent() {
                       participant.standing
                     )}
                   </TableCell>
-                  <TableCell className="text-lg font-medium">
+                  <TableCell className="text-lg font-medium underline">
+                  <Link href={`/profile/${participant.ref}`}>
                     {participant.name}
+                  </Link>
                   </TableCell>
                   <TableCell className="font-mono text-sm text-blue-600">
                     {participant.handle}

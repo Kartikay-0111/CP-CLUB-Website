@@ -80,10 +80,13 @@ export async function GET(req) {
       );
 
       if (filteredContestData.length > 0) {
+        // Add the key of the user object as the `ref` attribute
+        const ref = Object.keys(users).find((key) => users[key].lc_username === handle);
         return {
           name: user.name,
           handle,
           standing: filteredContestData[0].ranking,
+          ref,  // The key (e.g., "urabhay10") will be sent here
         };
       }
     }

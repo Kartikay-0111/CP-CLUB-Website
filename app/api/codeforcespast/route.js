@@ -18,6 +18,7 @@ export async function GET(req) {
     const filePath = path.resolve(process.cwd(), 'json/members.json');
     let userHandles = [];
     let userMapping = {};
+    let userRefMapping = {};  
 
     try {
         const data = fs.readFileSync(filePath, 'utf-8');
@@ -27,6 +28,9 @@ export async function GET(req) {
         userMapping = Object.fromEntries(
             Object.values(users).map(user => [user.cf_username, user.name])
         );
+        userRefMapping = Object.fromEntries(
+            Object.entries(users).map(([key, user]) => [user.cf_username, key]) 
+        );
     } catch (error) {
         console.error('Error reading JSON file:', error);
         return NextResponse.json({ error: 'Failed to read users file' }, { status: 500 });
@@ -34,9 +38,7 @@ export async function GET(req) {
     console.log(userHandles);
 
     const method = 'contest.standings';
-
     const rand = '123456';
-
     const unixTime = Math.floor(Date.now() / 1000).toString();
 
     const params = {
@@ -44,7 +46,7 @@ export async function GET(req) {
         time: unixTime,
         contestId,
         handles: userHandles.join(';'),
-        showUnofficial : true
+        showUnofficial: true
     };
 
     const sortedParams = Object.keys(params)
@@ -64,15 +66,17 @@ export async function GET(req) {
             const standings = response.data.result.rows;
 
             const formattedData = standings
-                .filter(row => row.rank > 0) 
+                .filter(row => row.rank > 0)
                 .map((row) => {
                     const userHandle = row.party.members[0].handle;
                     const userName = userMapping[userHandle] || "Unknown";
+                    const ref = userRefMapping[userHandle] || "Unknown";
 
                     return {
                         name: userName,
                         handle: userHandle,
-                        standing: row.rank
+                        standing: row.rank,
+                        ref 
                     };
                 });
 
