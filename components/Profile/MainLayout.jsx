@@ -176,6 +176,11 @@ function MainLayout({ data }) {
     },
   ];
 
+  // console.log(data.codeForcesData);
+  const totalSubmissions =
+    (data.leetCodeData?.acSubmissionNum[0]?.count ?? 0) +
+    (data.codeForcesData?.problemsSolvedCount ?? 0);
+
   return (
     <div className="flex flex-col gap-7">
       {/* upper part */}
@@ -228,10 +233,8 @@ function MainLayout({ data }) {
           {/* Heat map section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between text-sm text-slate-500">
-              <p>
-                {data?.leetCodeData?.acSubmissionNum[0].count} submissions in
-                last year
-              </p>
+              {/* <p>{data?.leetCodeData?.acSubmissionNum[0].count} submissions</p> */}
+              <p>{totalSubmissions} submissions</p>
             </div>
             <CalendarHeatmap
               startDate={new Date("2024-04-01")}
