@@ -229,8 +229,8 @@ function MainLayout({ data }) {
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <div className="flex justify-between text-sm text-slate-500">
               <p>
-                {data?.leetCodeData?.acSubmissionNum[0].submissions} submissions
-                in last year
+                {data?.leetCodeData?.acSubmissionNum[0].count} submissions in
+                last year
               </p>
             </div>
             <CalendarHeatmap
