@@ -14,15 +14,16 @@ const Navbar = () => {
     <nav className="bg-gray-800 sticky top-0 z-50 shadow-lg h-16">
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center pt-4">
         {/* <div className="text-white text-2xl font-semibold">CP Club</div> */}
-        <div className="text-white text-2xl font-semibold">
+        <div className="flex flex-row items-center text-white text-2xl font-semibold">
           <img
-            src={"/images/CP_logo.png"}
+            src={"/images/cplogo2.png"}
             width="0"
             height="0"
-            className="w-10  h-10 rounded-full cursor-pointer"
+            className="w-14 h-10 rounded-full cursor-pointer"
             quality={10}
             onClick={() => window.location.reload()}
           />
+          <span className="ml-2">CP Club</span>
         </div>
 
         <div className="hidden md:flex space-x-6">
