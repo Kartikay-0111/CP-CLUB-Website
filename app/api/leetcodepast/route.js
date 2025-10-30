@@ -85,7 +85,7 @@ export async function GET(req) {
         return {
           name: user.name,
           handle,
-          standing: filteredContestData[0].ranking,
+          standing: filteredContestData[0].ranking ? filteredContestData[0].ranking : "-",
           ref,  // The key (e.g., "urabhay10") will be sent here
         };
       }

@@ -18,11 +18,11 @@ import Link from "next/link";
 
 const platformLogos = {
   codeforces:
-    "https://upload.wikimedia.org/wikipedia/en/3/38/Codeforces%27s_new_logo.png",
+    "https://sta.codeforces.com/s/44094/favicon-32x32.png",
   leetcode:
-    "https://upload.wikimedia.org/wikipedia/commons/0/0a/LeetCode_Logo_black_with_text.svg",
+    "https://leetcode.com/static/images/LeetCode_logo.png",
   codechef:
-    "https://upload.wikimedia.org/wikipedia/en/7/7b/Codechef%28new%29_logo.svg",
+    "https://www.codechef.com/favicon.ico",
 };
 
 const platformColors = {
@@ -55,7 +55,14 @@ function ContestLeaderboardContent() {
           );
         }
         if (response?.data) {
-          setParticipants(response.data);
+          setParticipants(
+            Array.isArray(response.data)
+              ? [...response.data].sort((a, b) => {
+                  return a.standing - b.standing;
+                })
+              : response.data
+          );
+          // console.log("Fetched participants:", response.data);
         }
       } catch (error) {
         console.error(`Failed to fetch standings for ${platform}:`, error);
@@ -120,7 +127,7 @@ function ContestLeaderboardContent() {
             <TableBody>
               {filteredParticipants.map((participant, index) => (
                 <TableRow
-                  key={participant.handle}
+                  key={`${participant.handle}-${index}`}
                   className={`${
                     index % 2 === 0 ? "bg-white" : "bg-gray-50"
                   } transition-all hover:bg-gray-100`}

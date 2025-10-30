@@ -34,7 +34,7 @@ const CSES = () => {
     }
 
     // Example usage
-    fetchSolvedProblems('272564');
+    fetchSolvedProblems('224598');
 
   }, []);
 

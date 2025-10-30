@@ -11,10 +11,10 @@ import Link from "next/link"
 import Image from "next/image"
 
 const platformLogos = {
-  codeforces: "https://upload.wikimedia.org/wikipedia/en/3/38/Codeforces%27s_new_logo.png",
-  leetcode: "https://upload.wikimedia.org/wikipedia/commons/0/0a/LeetCode_Logo_black_with_text.svg",
-  codechef: "https://upload.wikimedia.org/wikipedia/en/7/7b/Codechef%28new%29_logo.svg",
-  atcoder: "https://img.atcoder.jp/logo/atcoder/logo.png",
+  codeforces: "https://sta.codeforces.com/s/44094/favicon-32x32.png",
+  leetcode: "https://leetcode.com/static/images/LeetCode_logo.png",
+  codechef: "https://www.codechef.com/favicon.ico",
+  atcoder: "https://atcoder.jp/favicon.ico",
   geeksforgeeks: "https://upload.wikimedia.org/wikipedia/commons/4/43/GeeksforGeeks.svg"
 }
 

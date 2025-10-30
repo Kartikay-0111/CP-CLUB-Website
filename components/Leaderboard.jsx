@@ -13,6 +13,14 @@ const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [attendanceMap, setAttendanceMap] = useState({});
+  const [activeTab, setActiveTab] = useState("all");
+
+  const filteredData =
+    activeTab === "all"
+      ? leaderboardData
+      : leaderboardData.filter((member) =>
+          activeTab === "club" ? member.inClub : !member.inClub
+        );
 
   const fetchUserRatings = async (handles) => {
     try {
@@ -114,7 +122,7 @@ const Leaderboard = () => {
           rankColor:
             cfData?.rank === "N/A"
               ? "bg-red-500 text-white"
-              : getRankColor(cfData.rating || 0),
+              : getRankColor(cfData?.rating || 0),
           leetCodeRating:
             leetCodeRating.find((item) => item.username === data.lc_username)
               ?.rating || 0,
@@ -132,7 +140,7 @@ const Leaderboard = () => {
 
       updatedMembers.sort((a, b) => b.rating - a.rating);
       setLeaderboardData(updatedMembers);
-
+      // console.log( "Leaderboard Data:", updatedMembers);
       const cachedData = {
         data: updatedMembers,
         attendanceMap,
@@ -185,11 +193,47 @@ const Leaderboard = () => {
     return <LeaderboardSkeleton />;
   }
 
-  return (
+return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 sm:p-8">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
         Leaderboard
       </h1>
+
+      {/* Tabs */}
+      <div className="flex space-x-2 sm:space-x-4 mb-6">
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            activeTab === "all"
+              ? "bg-teal-500 text-white shadow-md"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          }`}
+        >
+          All Members
+        </button>
+        <button
+          onClick={() => setActiveTab("club")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            activeTab === "club"
+              ? "bg-teal-500 text-white shadow-md"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          }`}
+        >
+          CP Club Members
+        </button>
+        <button
+          onClick={() => setActiveTab("nonclub")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            activeTab === "nonclub"
+              ? "bg-teal-500 text-white shadow-md"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          }`}
+        >
+          Non-CP Club Members
+        </button>
+      </div>
+
+      {/* Table */}
       <div className="w-full overflow-x-auto">
         <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead>
@@ -204,7 +248,7 @@ const Leaderboard = () => {
             </tr>
           </thead>
           <tbody>
-            {leaderboardData.map((member, index) => (
+            {filteredData.map((member, index) => (
               <tr
                 key={index}
                 className="border-b hover:bg-gray-100 text-center"
