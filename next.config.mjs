@@ -20,12 +20,20 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'userpic.codeforces.org',
+      },
+      {
+        protocol: 'https',
         hostname: 'upload.wikimedia.org',
       },
       {
         protocol: 'https',
         hostname: 'img.atcoder.jp',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.prod.website-files.com',
+      }
     ],
   },
 };

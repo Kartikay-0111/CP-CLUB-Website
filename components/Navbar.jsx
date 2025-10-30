@@ -15,13 +15,14 @@ const Navbar = () => {
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center pt-4">
         {/* <div className="text-white text-2xl font-semibold">CP Club</div> */}
         <div className="flex flex-row items-center text-white text-2xl font-semibold">
-          <img
+          <Image
             src={"/images/cplogo2.png"}
-            width="0"
-            height="0"
+            width={56}
+            height={40}
             className="w-14 h-10 rounded-full cursor-pointer"
             quality={10}
             onClick={() => window.location.reload()}
+            alt="cp club"
           />
           <span className="ml-2">CP Club</span>
         </div>

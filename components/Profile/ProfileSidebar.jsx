@@ -46,7 +46,9 @@ const ProfileSidebar = ({ data }) => {
       {/* User Details */}
       <div className="bg-white shadow-custom rounded-xl px-6 py-4 gap-3 flex flex-col justify-center items-center">
         {data.codeForcesData?.avatar ? (
-          <img
+          <Image
+            width={112}
+            height={112}
             src={data.codeForcesData?.titlePhoto}
             alt=""
             className="w-28 h-28 rounded-full"

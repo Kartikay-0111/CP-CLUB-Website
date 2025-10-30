@@ -6,6 +6,7 @@ import members from "../json/members.json";
 import Link from "next/link";
 import { CircleCheck, CircleX } from "lucide-react";
 import { LeaderboardSkeleton } from "./Skeleton";
+import Image from "next/image";
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
@@ -256,7 +257,9 @@ return (
                 <td className="p-2 sm:p-4 text-gray-800">{index + 1}</td>
                 <td className="p-2 sm:p-4 text-gray-800">
                   <div className="flex ml-10">
-                    <img
+                    <Image
+                      width={40}
+                      height={40}
                       src={member.titlePhoto}
                       alt={member.name}
                       className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-4"

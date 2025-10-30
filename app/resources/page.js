@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { ExternalLink, BookOpen, Code, Trophy, Target } from "lucide-react";
+import Image from "next/image";
+
 const Resources = () => {
 
   const platforms = [
@@ -206,7 +208,9 @@ const Resources = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     {platform.logo?.src && (
-                      <img
+                      <Image 
+                        width={40}
+                        height={40}
                         src={platform.logo.src}
                         alt={platform.logo.alt || platform.name}
                         className="w-10 h-10 rounded-md object-contain"
@@ -255,7 +259,7 @@ const Resources = () => {
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 font-bold mt-0.5">•</span>
-                <span>Be consistent and don't miss any contests</span>
+                <span>Be consistent and don&apos;t miss any contests</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 font-bold mt-0.5">•</span>
