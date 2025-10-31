@@ -22,7 +22,7 @@ async function fetchLCRating(username) {
       { timeout: 5000 } // 5-second timeout for the API request
     );
 
-    console.log("API response data:", response.data); // Log full response for debugging
+    // console.log("API response data:", response.data); // Log full response for debugging
 
     if (response.data?.data?.userContestRanking?.rating) {
       return Math.round(response.data.data.userContestRanking.rating);
@@ -37,7 +37,6 @@ async function fetchLCRating(username) {
 
 export async function GET(req) {
   const url = new URL(req.url);
-  console.log("jdjdhj");
 
   // Load the user list from the JSON file
   const filePath = path.resolve(process.cwd(), "json/members.json");

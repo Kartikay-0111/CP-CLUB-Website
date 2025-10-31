@@ -86,6 +86,7 @@ function getAverageContestRating(ratingData) {
 
 function MainLayout({ data }) {
   const [dailySolvedProblem, setdailySolvedProblems] = useState([]);
+  const [activeTab, setActiveTab] = useState('leetcode');
 
   useEffect(() => {
     const fetchDailySolvedProblems = async () => {
@@ -107,13 +108,15 @@ function MainLayout({ data }) {
   let totalContests =
     data.leetCodeData?.userContestDetails?.contestParticipation.length +
     data.codeForcesData?.ratingData?.length;
+
   let totalQuestion = data.leetCodeData?.acSubmissionNum[0]?.count;
   let calenderSubmission = data.leetCodeData?.submissionCalendar;
+
   const topicWiseAnalysis = mergeTopicData(
     data.leetCodeData?.topicWiseAnalysis,
     data.codeForcesData?.topicAnalysis
   );
-
+  
   const averageContestRating = getAverageContestRating(
     data.codeForcesData?.ratingData
   );
@@ -158,11 +161,16 @@ function MainLayout({ data }) {
     dailySolvedProblem
   );
 
+  const leetContestSolvedSum = (
+    data.leetCodeData?.userContestDetails?.contestParticipation ?? []
+  ).reduce((sum, p) => sum + (p?.problemsSolved ?? 0), 0);
+
   const topData = [
     {
       image: "/svgs/puzzle.svg",
       title: "Contest Questions",
-      count: data.codeForcesData?.problemsSolvedCount ?? 0,
+      count:
+        (data.codeForcesData?.problemsSolvedCount ?? 0) + leetContestSolvedSum,
     },
     {
       image: "/svgs/trophy.svg",
@@ -172,11 +180,11 @@ function MainLayout({ data }) {
     {
       image: "/svgs/active-days.svg",
       title: "Total Active Days",
-      count: Object.keys(calenderSubmission).length,
+      count: Object.keys(calenderSubmission || {}).length,
     },
   ];
-
   // console.log(data.codeForcesData);
+
   const totalSubmissions =
     (data.leetCodeData?.acSubmissionNum[0]?.count ?? 0) +
     (data.codeForcesData?.problemsSolvedCount ?? 0);
@@ -208,13 +216,45 @@ function MainLayout({ data }) {
       </div>
 
       <div className="flex gap-7">
+        {/* left part */}
         <div className="w-full flex-1 flex flex-col gap-7">
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <p>Problems solved from leetcode</p>
-
-            <div className="flex gap-3">
-              <DoughnutChart data={data.leetCodeData?.acSubmissionNum} />
+            <div className="flex gap-4 border-b">
+              <button
+                onClick={() => setActiveTab('leetcode')}
+                className={`pb-2 px-4 ${activeTab === 'leetcode'
+                    ? 'border-b-2 border-blue-500 text-blue-500'
+                    : 'text-gray-500'
+                  }`}
+              >
+                LeetCode
+              </button>
+              <button
+                onClick={() => setActiveTab('codeforces')}
+                className={`pb-2 px-4 ${activeTab === 'codeforces'
+                    ? 'border-b-2 border-blue-500 text-blue-500'
+                    : 'text-gray-500'
+                  }`}
+              >
+                CodeForces
+              </button>
             </div>
+
+            {activeTab === 'leetcode' ? (
+              <>
+                <p>Problems solved from leetcode</p>
+                <div className="flex gap-3">
+                  <DoughnutChart data={data.leetCodeData?.acSubmissionNum} />
+                </div>
+              </>
+            ) : (
+              <>
+                <p>Problems solved from codeforces</p>
+                <div className="flex gap-3">
+                  <DoughnutChart data={data.codeForcesData?.topicAnalysis} />
+                </div>
+              </>
+            )}
           </div>
 
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
@@ -267,7 +307,6 @@ function MainLayout({ data }) {
           </div>
 
           {/* Topic Analysis section */}
-
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
             <p>Topic Wise Analysis</p>
             <TopicAnalysis data={topicWiseAnalysis} />

@@ -3,9 +3,10 @@ import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 
-export async function GET(req) {
+export async function GET(req , {params}) {
     const url = new URL(req.url);
-    const userId = url.searchParams.get('userId');
+    // Prefer dynamic route param, fallback to query
+    let userId = params?.userId || url.searchParams.get('userId');
 
     if (!userId) {
         return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });

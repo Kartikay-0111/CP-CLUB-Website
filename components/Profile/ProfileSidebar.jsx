@@ -39,8 +39,16 @@ const ProfileSidebar = ({ data }) => {
       platform: "Codechef",
       username: data.user_data.cc_username,
       link: "https://www.codechef.com/users",
-    },
+    }
   ];
+  if (data.user_data?.cses_id !== null && data.user_data?.cses_id !== undefined) {
+    platformsData.push({
+      image: "/images/cses.png",
+      platform: "CSES",
+      username: data.user_data.cses_id,
+      link: "https://cses.fi/user",
+    });
+  }
   return (
     <div className="grid gap-4">
       {/* User Details */}
@@ -84,9 +92,36 @@ const ProfileSidebar = ({ data }) => {
             );
           })}
         </div>
-      </div>
 
-      {/* Coding Profiles */}
+        {data.user_data?.cses_id ? (
+          <div className="pt-2 w-full">
+            <Link
+              href={`/cses/${encodeURIComponent(data.user_data.cses_id)}`}
+              className="w-full flex items-center justify-between bg-[#F5F6FE] p-3 rounded-md hover:bg-gray-100 transition"
+            >
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/images/cses.png"
+                  width={24}
+                  height={24}
+                  className="w-6 h-6"
+                  alt="CSES"
+                />
+                <div className="text-sm">
+                  <p className="font-medium">CSES Summary</p>
+                  <p className="text-xs text-slate-500">{data.user_data.cses_id}</p>
+                </div>
+              </div>
+              <SquareArrowOutUpRight />
+            </Link>
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm text-slate-500">No CSES ID</p>
+          </div>
+        )}
+      </div>
+      
       <div className="bg-white shadow-custom rounded-xl px-4 py-4 flex flex-col justify-center h-full">
         <p className="font-semibold px-1">Visit your Coding Platforms</p>
         <div className="grid gap-4">

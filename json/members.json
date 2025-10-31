@@ -5,7 +5,7 @@
     "lc_username": "hewhocodes",
     "cc_username": "urabhay10",
     "cf_username": "hewhocodes",
-    "cses_id": null,
+    "cses_id": "224598",
     "inClub": true
   },
   "sohamrane301": {
@@ -113,7 +113,7 @@
     "lc_username": "kartikay7905",
     "cc_username": "kartikay7905",
     "cf_username": "Chef-KTK",
-    "cses_id": null,
+    "cses_id": "380180",
     "inClub": true
   },
   "mohnishpathak_21": {
@@ -652,7 +652,7 @@
     "year": "SY",
     "lc_username": "BorrisX",
     "cc_username": "None",
-    "cf_username": "DeathChargRocks21 ",
+    "cf_username": "DeathChargRocks21",
     "cses_id": "316429",
     "inClub": true
   },
@@ -671,7 +671,7 @@
     "lc_username": "sanvinaik",
     "cc_username": "sanvinaik",
     "cf_username": "sanvinaik",
-    "cses_id": "sanvinaik",
+    "cses_id": null,
     "inClub": true
   },
   "Darsh_Shah_UD": {
@@ -743,7 +743,7 @@
     "lc_username": "dhirajshirse_20",
     "cc_username": "dhiraj_20",
     "cf_username": "ddshirse_b24",
-    "cses_id": "Dhiraj_2006",
+    "cses_id": null,
     "inClub": false
   },
   "rrmehta_b24": {
@@ -790,5 +790,14 @@
     "cf_username": "Sagarankita",
     "cses_id": null,
     "inClub": false
+  },
+  "kartiklande70":{
+    "name": "Kartik Lande",
+    "year": "TY",
+    "lc_username": "kartiklande70",
+    "cc_username": "kartik70_30",
+    "cf_username": "kartik70",
+    "cses_id": null,
+    "inClub": true
   }
 }

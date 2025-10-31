@@ -13,7 +13,7 @@ const ProfileContestTable = ({data}) => {
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000);
-    return date.toLocaleString(); 
+    return date.toLocaleDateString(); 
   };
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,7 +42,7 @@ const ProfileContestTable = ({data}) => {
     return name.toLowerCase().replace(/\s+/g, '-').concat('/');
   };
 
-  console.log(currentContests);
+  // console.log(currentContests);
 
   return (
     <div>
@@ -52,7 +52,7 @@ const ProfileContestTable = ({data}) => {
             <thead>
               <tr className="text-slate-500">
                 <th className="p-2 text-sm font-medium">Contest</th>
-                <th className="p-2 text-sm font-medium">Start Time</th>
+                <th className="p-2 text-sm font-medium">Date</th>
                 <th className="p-2 text-sm font-medium">Rank</th>
                 <th className="p-2 text-sm font-medium">Solved</th>
               </tr>
@@ -103,7 +103,7 @@ const ProfileContestTable = ({data}) => {
                   </td>
                   <td className="py-4 text-sm text-gray-700">{contest.rank}</td>
                   <td className="py-4 text-sm text-gray-700">
-                    {contest.problemsSolved ?? "No Data"}
+                    {contest.problemsSolved ?? 0}
                   </td>
                 </tr>
               ))}

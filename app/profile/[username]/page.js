@@ -10,6 +10,7 @@ async function page({ params }) {
 
   const leetCodeData = await getLeetCodeData(user_data.lc_username);
   const codeForcesData = await getCodeForcesData(user_data.cf_username);
+
   let data = {
     user_data: user_data,
     leetCodeData: leetCodeData ?? null,
@@ -36,7 +37,6 @@ async function page({ params }) {
 
   console.log(data);
   
-
   return (
     <div>
       <Profile data={data} />
