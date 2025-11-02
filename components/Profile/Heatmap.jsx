@@ -57,7 +57,18 @@ const ActivityHeatmap = ({ heatMapData }) => {
     };
 
     const handlePrevious = () => {
-        setTimeOffset(prev => prev + 1);
+        setTimeOffset(prev => {
+            const candidateOffset = prev + 1;
+            const candidateEnd = new Date();
+            candidateEnd.setMonth(candidateEnd.getMonth() - (9 * candidateOffset));
+
+            const earliestAllowed = new Date();
+            earliestAllowed.setFullYear(earliestAllowed.getFullYear() - 4);
+
+            // Prevent going earlier than 4 years before today
+            if (candidateEnd < earliestAllowed) return prev;
+            return candidateOffset;
+        });
     };
 
     const handleNext = () => {
