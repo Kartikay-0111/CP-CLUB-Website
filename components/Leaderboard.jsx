@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import members from "../json/members.json";
 import Link from "next/link";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleCheck, CircleX, ArrowUp, ArrowDown } from "lucide-react";
 import { LeaderboardSkeleton } from "./Skeleton";
 import Image from "next/image";
 
@@ -15,13 +15,14 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
   const [attendanceMap, setAttendanceMap] = useState({});
   const [activeTab, setActiveTab] = useState("all");
+  const [sortKey, setSortKey] = useState(null);
 
   const filteredData =
     activeTab === "all"
       ? leaderboardData
       : leaderboardData.filter((member) =>
-          activeTab === "club" ? member.inClub : !member.inClub
-        );
+        activeTab === "club" ? member.inClub : !member.inClub
+      );
 
   const fetchUserRatings = async (handles) => {
     try {
@@ -180,6 +181,17 @@ const Leaderboard = () => {
       cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION;
 
     if (isCacheValid) {
+      if (sortKey == "leetCodeRating") {
+        cachedData.data.sort((a, b) => b.leetCodeRating - a.leetCodeRating);
+      }
+      else if(sortKey == "attendance"){
+        cachedData.data.sort((a, b) => {
+          const aAttendance = cachedData.attendanceMap[a.cf_username].filter(Boolean).length;
+          const bAttendance = cachedData.attendanceMap[b.cf_username].filter(Boolean).length;
+          return bAttendance - aAttendance;
+        }
+      );
+      }
       setLeaderboardData(cachedData.data);
       setAttendanceMap(cachedData.attendanceMap);
       setLoading(false);
@@ -188,13 +200,13 @@ const Leaderboard = () => {
     }
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [sortKey]);
 
   if (loading) {
     return <LeaderboardSkeleton />;
   }
 
-return (
+  return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 sm:p-8">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
         Leaderboard
@@ -204,31 +216,28 @@ return (
       <div className="flex space-x-2 sm:space-x-4 mb-6">
         <button
           onClick={() => setActiveTab("all")}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            activeTab === "all"
+          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "all"
               ? "bg-teal-500 text-white shadow-md"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-          }`}
+            }`}
         >
           All Members
         </button>
         <button
           onClick={() => setActiveTab("club")}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            activeTab === "club"
+          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "club"
               ? "bg-teal-500 text-white shadow-md"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-          }`}
+            }`}
         >
           CP Club Members
         </button>
         <button
           onClick={() => setActiveTab("nonclub")}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            activeTab === "nonclub"
+          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "nonclub"
               ? "bg-teal-500 text-white shadow-md"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-          }`}
+            }`}
         >
           Non-CP Club Members
         </button>
@@ -242,10 +251,44 @@ return (
               <th className="p-2 sm:p-4">Sr No</th>
               <th className="p-2 sm:p-4">Name</th>
               <th className="p-2 sm:p-4">Year</th>
-              <th className="p-2 sm:p-4">Leetcode Rating</th>
+              <th className="p-2 sm:p-4 flex items-center justify-center">
+                <span className="mr-1">Leetcode Rating</span>
+                <button
+                  onClick={() => {
+                    setSortKey(sortKey === "leetCodeRating" ? null : "leetCodeRating");
+                  }}
+                  className="flex items-center"
+                >
+                  {sortKey === "leetCodeRating" ? 
+                    (
+                      <ArrowDown size={16} className="ml-1" />
+                    ) : 
+                    (
+                      <ArrowUp size={16} className="ml-1 opacity-30" />
+                    )
+                  }
+                </button>
+              </th>
               <th className="p-2 sm:p-4">Codeforces Rating</th>
               <th className="p-2 sm:p-4">Rank</th>
-              <th className="p-2 sm:p-4">Last 5 Contests Attendance</th>
+              <th className="p-2 sm:p-4 flex items-center justify-center">
+                <span className="mr-1">Last 5 Contests Attendance</span>
+                <button
+                  onClick={() => {
+                    setSortKey(sortKey === "attendance" ? null : "attendance");
+                  }}
+                  className="flex items-center"
+                >
+                  {sortKey === "attendance" ? 
+                    (
+                      <ArrowDown size={16} className="ml-1" />
+                    ) : 
+                    (
+                      <ArrowUp size={16} className="ml-1 opacity-30" />
+                    )
+                  }
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>

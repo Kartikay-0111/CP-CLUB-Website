@@ -9,6 +9,7 @@ import RatingChart from "./RatingChart";
 import ProfileContestTable from "./ProfileContestTable";
 import TopicAnalysis from "./TopicAnalysis";
 import Link from "next/link";
+import ActivityHeatmap from "./Heatmap";
 
 function mergeTopicData(leetCodeData, codeForcesData) {
   const combinedAnalysis = { advanced: [], intermediate: [], fundamental: [] };
@@ -112,6 +113,8 @@ function MainLayout({ data }) {
   let totalQuestion = data.leetCodeData?.acSubmissionNum[0]?.count;
   let calenderSubmission = data.leetCodeData?.submissionCalendar;
 
+  console.log(calenderSubmission);
+  
   const topicWiseAnalysis = mergeTopicData(
     data.leetCodeData?.topicWiseAnalysis,
     data.codeForcesData?.topicAnalysis
@@ -160,6 +163,7 @@ function MainLayout({ data }) {
     heatmapData,
     dailySolvedProblem
   );
+  console.log(mergedData);
 
   const leetContestSolvedSum = (
     data.leetCodeData?.userContestDetails?.contestParticipation ?? []
@@ -185,6 +189,7 @@ function MainLayout({ data }) {
   ];
   // console.log(data.codeForcesData);
 
+  
   const totalSubmissions =
     (data.leetCodeData?.acSubmissionNum[0]?.count ?? 0) +
     (data.codeForcesData?.problemsSolvedCount ?? 0);
@@ -271,35 +276,7 @@ function MainLayout({ data }) {
         {/* right part */}
         <div className="w-full flex flex-col gap-7 flex-1">
           {/* Heat map section */}
-          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <div className="flex justify-between text-sm text-slate-500">
-              {/* <p>{data?.leetCodeData?.acSubmissionNum[0].count} submissions</p> */}
-              <p>{totalSubmissions} submissions</p>
-            </div>
-            <CalendarHeatmap
-              startDate={new Date("2024-04-01")}
-              endDate={new Date("2024-12-31")}
-              values={mergedData}
-              classForValue={(value) => {
-                if (!value) {
-                  return "color-empty";
-                }
-                return `color-github-${Math.min(value.count, 4)}`;
-              }}
-              tooltipDataAttrs={(value) => ({
-                "data-tooltip-id": "heatmap-tooltip",
-                "data-tooltip-content": value.date
-                  ? `${value.date}: ${value.count} submissions`
-                  : "No submissions",
-              })}
-            />
-            <Tooltip
-              id="heatmap-tooltip"
-              place="top"
-              type="dark"
-              effect="float"
-            />
-          </div>
+          <ActivityHeatmap heatMapData={mergedData} />
 
           {/* Rating chart section */}
           <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
