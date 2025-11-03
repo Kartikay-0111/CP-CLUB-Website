@@ -4,8 +4,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import members from "../json/members.json";
 import Link from "next/link";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleCheck, CircleX, ArrowUp, ArrowDown } from "lucide-react";
 import { LeaderboardSkeleton } from "./Skeleton";
+import Image from "next/image";
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
@@ -13,6 +14,15 @@ const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [attendanceMap, setAttendanceMap] = useState({});
+  const [activeTab, setActiveTab] = useState("all");
+  const [sortKey, setSortKey] = useState(null);
+
+  const filteredData =
+    activeTab === "all"
+      ? leaderboardData
+      : leaderboardData.filter((member) =>
+        activeTab === "club" ? member.inClub : !member.inClub
+      );
 
   const fetchUserRatings = async (handles) => {
     try {
@@ -114,7 +124,7 @@ const Leaderboard = () => {
           rankColor:
             cfData?.rank === "N/A"
               ? "bg-red-500 text-white"
-              : getRankColor(cfData.rating || 0),
+              : getRankColor(cfData?.rating || 0),
           leetCodeRating:
             leetCodeRating.find((item) => item.username === data.lc_username)
               ?.rating || 0,
@@ -132,7 +142,7 @@ const Leaderboard = () => {
 
       updatedMembers.sort((a, b) => b.rating - a.rating);
       setLeaderboardData(updatedMembers);
-
+      // console.log( "Leaderboard Data:", updatedMembers);
       const cachedData = {
         data: updatedMembers,
         attendanceMap,
@@ -171,6 +181,17 @@ const Leaderboard = () => {
       cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION;
 
     if (isCacheValid) {
+      if (sortKey == "leetCodeRating") {
+        cachedData.data.sort((a, b) => b.leetCodeRating - a.leetCodeRating);
+      }
+      else if(sortKey == "attendance"){
+        cachedData.data.sort((a, b) => {
+          const aAttendance = cachedData.attendanceMap[a.cf_username].filter(Boolean).length;
+          const bAttendance = cachedData.attendanceMap[b.cf_username].filter(Boolean).length;
+          return bAttendance - aAttendance;
+        }
+      );
+      }
       setLeaderboardData(cachedData.data);
       setAttendanceMap(cachedData.attendanceMap);
       setLoading(false);
@@ -179,7 +200,7 @@ const Leaderboard = () => {
     }
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [sortKey]);
 
   if (loading) {
     return <LeaderboardSkeleton />;
@@ -190,6 +211,39 @@ const Leaderboard = () => {
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
         Leaderboard
       </h1>
+
+      {/* Tabs */}
+      <div className="flex space-x-2 sm:space-x-4 mb-6">
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "all"
+              ? "bg-teal-500 text-white shadow-md"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+            }`}
+        >
+          All Members
+        </button>
+        <button
+          onClick={() => setActiveTab("club")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "club"
+              ? "bg-teal-500 text-white shadow-md"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+            }`}
+        >
+          CP Club Members
+        </button>
+        <button
+          onClick={() => setActiveTab("nonclub")}
+          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "nonclub"
+              ? "bg-teal-500 text-white shadow-md"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+            }`}
+        >
+          Non-CP Club Members
+        </button>
+      </div>
+
+      {/* Table */}
       <div className="w-full overflow-x-auto">
         <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead>
@@ -197,14 +251,48 @@ const Leaderboard = () => {
               <th className="p-2 sm:p-4">Sr No</th>
               <th className="p-2 sm:p-4">Name</th>
               <th className="p-2 sm:p-4">Year</th>
-              <th className="p-2 sm:p-4">Leetcode Rating</th>
+              <th className="p-2 sm:p-4 flex items-center justify-center">
+                <span className="mr-1">Leetcode Rating</span>
+                <button
+                  onClick={() => {
+                    setSortKey(sortKey === "leetCodeRating" ? null : "leetCodeRating");
+                  }}
+                  className="flex items-center"
+                >
+                  {sortKey === "leetCodeRating" ? 
+                    (
+                      <ArrowDown size={16} className="ml-1" />
+                    ) : 
+                    (
+                      <ArrowUp size={16} className="ml-1 opacity-30" />
+                    )
+                  }
+                </button>
+              </th>
               <th className="p-2 sm:p-4">Codeforces Rating</th>
               <th className="p-2 sm:p-4">Rank</th>
-              <th className="p-2 sm:p-4">Last 5 Contests Attendance</th>
+              <th className="p-2 sm:p-4 flex items-center justify-center">
+                <span className="mr-1">Last 5 Contests Attendance</span>
+                <button
+                  onClick={() => {
+                    setSortKey(sortKey === "attendance" ? null : "attendance");
+                  }}
+                  className="flex items-center"
+                >
+                  {sortKey === "attendance" ? 
+                    (
+                      <ArrowDown size={16} className="ml-1" />
+                    ) : 
+                    (
+                      <ArrowUp size={16} className="ml-1 opacity-30" />
+                    )
+                  }
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {leaderboardData.map((member, index) => (
+            {filteredData.map((member, index) => (
               <tr
                 key={index}
                 className="border-b hover:bg-gray-100 text-center"
@@ -212,7 +300,9 @@ const Leaderboard = () => {
                 <td className="p-2 sm:p-4 text-gray-800">{index + 1}</td>
                 <td className="p-2 sm:p-4 text-gray-800">
                   <div className="flex ml-10">
-                    <img
+                    <Image
+                      width={40}
+                      height={40}
                       src={member.titlePhoto}
                       alt={member.name}
                       className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-4"

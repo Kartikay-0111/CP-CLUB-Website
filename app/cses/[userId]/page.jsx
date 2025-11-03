@@ -1,42 +1,70 @@
 "use client"
 
 import React, { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 
-const CSES = () => {
+const CSESUserPage = () => {
+  const params = useParams();
+  const userId = params?.userId;
   const [csesData, setCsesData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedSection, setSelectedSection] = useState('all');
   const [showFilter, setShowFilter] = useState('all'); // 'all', 'solved', 'unsolved'
   
+//   console.log('CSES UserId from params:', userId);
   useEffect(() => {
-    // Function to fetch solved problems from API
-    async function fetchSolvedProblems(userId) {
+    if (!userId) return;
+
+    async function fetchSolvedProblems(id) {
       setLoading(true);
       setError(null);
       
       try {
-        const response = await fetch(`/api/cses?userId=${userId}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch CSES data');
+          const cacheKey = `cses:${encodeURIComponent(id)}`;
+          const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+  
+          // Try to use cached data first (so UI can show immediately on reload)
+          try {
+              const raw = localStorage.getItem(cacheKey);
+              if (raw) {
+                  const parsed = JSON.parse(raw);
+                  if (parsed?.ts && (Date.now() - parsed.ts) < CACHE_TTL && parsed.data) {
+                      setCsesData(parsed.data);
+                      setLoading(false);
+                      return; // skip using the network response body
+                  }
+              }
+          } catch (e) {
+              console.warn('CSES cache read failed', e);
+          }
+  
+          const response = await fetch(`/api/cses?userId=${encodeURIComponent(id)}`);
+          
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({ error: 'Unknown' }));
+            throw new Error(err?.error || 'Failed to fetch CSES data');
+          }
+          const data = await response.json();
+  
+          // Cache the fresh response
+          try {
+              localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data }));
+          } catch (e) {
+              console.warn('CSES cache write failed', e);
+          }
+          setCsesData(data);
+        } catch (err) {
+          setError(err.message);
+          console.error('Error fetching CSES data:', err);
+        } finally {
+          setLoading(false);
         }
         
-        const data = await response.json();
-        setCsesData(data);
-        console.log('CSES Data:', data);
-      } catch (err) {
-        setError(err.message);
-        console.error('Error fetching CSES data:', err);
-      } finally {
-        setLoading(false);
-      }
     }
 
-    // Example usage
-    fetchSolvedProblems('272564');
+    fetchSolvedProblems(userId);
 
-  }, []);
+  }, [userId]);
 
   const renderProblemCard = (problem, index) => (
     <div key={`${problem.id}-${index}`} className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
@@ -120,6 +148,10 @@ const CSES = () => {
       </div>
     );
   };
+
+  if (!userId) {
+    return <div className="p-6">No user id provided.</div>;
+  }
 
   return (
     <div className="p-6">
@@ -227,4 +259,4 @@ const CSES = () => {
   )
 }
 
-export default CSES
+export default CSESUserPage
