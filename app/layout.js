@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-  title: "CP Club 2024",
+  title: "CP Club 2025-26",
   description: "Developed by COC",
 };
 
