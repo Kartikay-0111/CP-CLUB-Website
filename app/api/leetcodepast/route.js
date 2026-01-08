@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-async function fetchContestRankingHistory(username) {
+// Helper function to fetch data for a single user
+async function fetchUserContestHistory(username) {
   const query = `
         query userContestRankingInfo($username: String!) {
             userContestRankingHistory(username: $username) {
@@ -23,81 +24,74 @@ async function fetchContestRankingHistory(username) {
     const response = await axios.post(
       "https://leetcode.com/graphql",
       { query, variables },
-      { timeout: 5000 } // 5-second timeout for the API request
+      { timeout: 5000 }
     );
 
-    if (response.data?.data?.userContestRankingHistory) {
-      return response.data.data.userContestRankingHistory.map((contest) => ({
-        ranking: contest.ranking,
-        contestTitle: contest.contest.title,
-        contestStartTime: contest.contest.startTime,
-      }));
-    } else {
-      return null;
-    }
+    return response.data?.data?.userContestRankingHistory || [];
   } catch (error) {
-    console.error(
-      `Error fetching contest data for ${username}:`,
-      error.message
-    );
-    return null;
+    console.error(`Error fetching data for ${username}:`, error.message);
+    return [];
   }
 }
 
 export async function GET(req) {
   const url = new URL(req.url);
-  const contestName =
-    url.searchParams.get("contestName") || "weekly-contest-422";
+  
+  // Get the exact contest name from URL (e.g., "Weekly Contest 482")
+  const targetContestName = url.searchParams.get("contestName") || 'Weekly Contest 482'; 
 
-  // Load the user list from the JSON file
+  // 1. Load members from the JSON file
   const filePath = path.resolve(process.cwd(), "json/members.json");
-  let users;
-
+  let usersData;
+  
   try {
-    const data = fs.readFileSync(filePath, "utf-8");
-    users = JSON.parse(data);
+    const fileContent = fs.readFileSync(filePath, "utf-8");
+    usersData = JSON.parse(fileContent);
   } catch (error) {
-    console.error("Error reading JSON file:", error);
-    return NextResponse.json(
-      { error: "Failed to read users file" },
-      { status: 500 }
-    );
+    console.error("Error reading members file:", error);
+    return NextResponse.json({ error: "Failed to read members file" }, { status: 500 });
   }
 
-  const userHandles = Object.values(users).map((user) => user.lc_username);
+  // 2. Convert the users object into an array
+  const membersList = Object.entries(usersData).map(([key, data]) => ({
+    id: key,       // This becomes the 'ref'
+    ...data
+  }));
 
-  // Fetch contest data for all users in parallel
-  const contestPromises = userHandles.map(async (handle) => {
-    const user = Object.values(users).find((u) => u.lc_username === handle);
-    const contestData = await fetchContestRankingHistory(handle);
+  // console.log(`Fetching ranklist for: "${targetContestName}" | Total Members: ${membersList.length}`);
 
-    if (contestData && contestData.length > 0) {
-      const filteredContestData = contestData.filter(
-        (contest) =>
-          contest.contestTitle
-            .toLowerCase()
-            .includes(contestName.toLowerCase()) && contest.ranking !== 0
-      );
+  // 3. Fetch all data in parallel
+  const promises = membersList.map(async (member) => {
+    if (!member.lc_username) return null;
 
-      if (filteredContestData.length > 0) {
-        // Add the key of the user object as the `ref` attribute
-        const ref = Object.keys(users).find((key) => users[key].lc_username === handle);
-        return {
-          name: user.name,
-          handle,
-          standing: filteredContestData[0].ranking ? filteredContestData[0].ranking : "-",
-          ref,  // The key (e.g., "urabhay10") will be sent here
-        };
-      }
+    const history = await fetchUserContestHistory(member.lc_username);
+    
+    // Find the specific contest entry matching the name exactly
+    const contestEntry = history.find((entry) => 
+      entry.contest.title === targetContestName
+    );
+
+    // Only return if found and they have a valid rank
+    if (contestEntry && contestEntry.ranking > 0) {
+      return {
+        ref: member.id, // ID from the JSON key
+        name: member.name,
+        handle: member.lc_username,
+        standing: contestEntry.ranking,
+        contestTitle: contestEntry.contest.title,
+      };
     }
-    return null;
+
+    return null; // User didn't participate
   });
 
-  // Await all promises and filter out null values
-  const results = (await Promise.all(contestPromises)).filter(
-    (result) => result !== null
-  );
+  const results = await Promise.all(promises);
+  
+  const ranklist = results
+    .filter(item => item !== null)
+    .sort((a, b) => a.standing - b.standing);
 
-  // Respond with the filtered results
-  return NextResponse.json(results);
+  // console.log(`Found ${ranklist.length} participants.`);
+
+  return NextResponse.json(ranklist);
 }

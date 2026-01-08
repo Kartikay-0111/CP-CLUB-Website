@@ -71,15 +71,51 @@ const Leaderboard = () => {
     return "bg-gray-500 text-white";
   };
 
+  const getValidCodeforcesUsers = async (initialHandles) => {
+    let currentHandles = [...initialHandles];
+    let attempts = 0;
+    
+    while (attempts < 5 && currentHandles.length > 0) {
+      try {
+        const response = await axios.get(
+          `https://codeforces.com/api/user.info?handles=${currentHandles.join(";")}`
+        );
+        return { 
+            validHandles: response.data.result.map(u => u.handle) 
+        };
+      } catch (error) {
+        attempts++;
+        const comment = error.response?.data?.comment;
+
+        // Extract the specific bad handle from the error message
+        if (comment && comment.includes("not found")) {
+          const matches = comment.match(/User with handle (.+) not found/);
+          if (matches && matches[1]) {
+            const badHandle = matches[1];
+            console.warn(`Invalid Handle Found: ${badHandle}. Removing from list...`);
+
+            currentHandles = currentHandles.filter(h => h !== badHandle);
+            continue; 
+          }
+        }
+        console.error("Critical API Error:", error);
+        break;
+      }
+    }
+    return { validHandles: [] };
+  };
+
   const fetchRatingsAndAttendance = async () => {
     const handles = Object.keys(members).map(
       (member) => members[member].cf_username
     );
     setLoading(true);
+    const { validHandles } = await getValidCodeforcesUsers(handles);
+
     const lastFiveContests = await fetchLastFiveContests();
 
     try {
-      const attendanceMap = handles.reduce((acc, handle) => {
+      const attendanceMap = validHandles.reduce((acc, handle) => {
         acc[handle] = [false, false, false, false, false];
         return acc;
       }, {});
@@ -88,7 +124,7 @@ const Leaderboard = () => {
 
       for (const contestId of lastFiveContests) {
         const response = await axios.get(
-          `https://codeforces.com/api/contest.standings?contestId=${contestId}&handles=${handles.join(
+          `https://codeforces.com/api/contest.standings?contestId=${contestId}&handles=${validHandles.join(
             ";"
           )}&showUnofficial=false`
         );
@@ -104,7 +140,7 @@ const Leaderboard = () => {
 
       setAttendanceMap(attendanceMap);
 
-      const cfRatings = await fetchUserRatings(handles);
+      const cfRatings = await fetchUserRatings(validHandles);
       const updatedMembers = [];
 
       for (const [username, data] of Object.entries(members)) {

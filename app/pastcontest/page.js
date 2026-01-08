@@ -49,9 +49,9 @@ function ContestLeaderboardContent() {
           response = await axios.get(
             `/api/codeforcespast?contestId=${contestId}`
           );
-        } else if (platform === "leetcode" && contestName) {
+        } else if (platform === "leetcode" && contestId) {
           response = await axios.get(
-            `/api/leetcodepast?contestName=${contestName}`
+            `/api/leetcodepast?contestId=${contestId}&contestName=${contestName}`
           );
         }
         if (response?.data) {
@@ -62,7 +62,7 @@ function ContestLeaderboardContent() {
                 })
               : response.data
           );
-          // console.log("Fetched participants:", response.data);
+          console.log("Fetched participants:", response.data);
         }
       } catch (error) {
         console.error(`Failed to fetch standings for ${platform}:`, error);
