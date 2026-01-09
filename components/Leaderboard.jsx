@@ -74,14 +74,14 @@ const Leaderboard = () => {
   const getValidCodeforcesUsers = async (initialHandles) => {
     let currentHandles = [...initialHandles];
     let attempts = 0;
-    
+
     while (attempts < 5 && currentHandles.length > 0) {
       try {
         const response = await axios.get(
           `https://codeforces.com/api/user.info?handles=${currentHandles.join(";")}`
         );
-        return { 
-            validHandles: response.data.result.map(u => u.handle) 
+        return {
+          validHandles: response.data.result.map(u => u.handle)
         };
       } catch (error) {
         attempts++;
@@ -95,7 +95,7 @@ const Leaderboard = () => {
             console.warn(`Invalid Handle Found: ${badHandle}. Removing from list...`);
 
             currentHandles = currentHandles.filter(h => h !== badHandle);
-            continue; 
+            continue;
           }
         }
         console.error("Critical API Error:", error);
@@ -220,13 +220,13 @@ const Leaderboard = () => {
       if (sortKey == "leetCodeRating") {
         cachedData.data.sort((a, b) => b.leetCodeRating - a.leetCodeRating);
       }
-      else if(sortKey == "attendance"){
+      else if (sortKey == "attendance") {
         cachedData.data.sort((a, b) => {
           const aAttendance = cachedData.attendanceMap[a.cf_username].filter(Boolean).length;
           const bAttendance = cachedData.attendanceMap[b.cf_username].filter(Boolean).length;
           return bAttendance - aAttendance;
         }
-      );
+        );
       }
       setLeaderboardData(cachedData.data);
       setAttendanceMap(cachedData.attendanceMap);
@@ -242,154 +242,234 @@ const Leaderboard = () => {
     return <LeaderboardSkeleton />;
   }
 
+  // Helper function to render rank with medals for top 3
+  const renderRank = (index) => {
+    const Medal = ({ className }) => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15" />
+        <path d="M11 12 5.12 2.2" />
+        <path d="m13 12 5.88-9.8" />
+        <path d="M8 7h8" />
+        <circle cx="12" cy="17" r="5" />
+        <path d="M12 18v-2h-.5" />
+      </svg>
+    );
+
+    if (index === 0) {
+      return (
+        <div className="flex items-center justify-center">
+          <Medal className="w-6 h-6 text-yellow-400 drop-shadow-glow" />
+        </div>
+      );
+    }
+    if (index === 1) {
+      return (
+        <div className="flex items-center justify-center">
+          <Medal className="w-6 h-6 text-gray-300 drop-shadow-glow" />
+        </div>
+      );
+    }
+    if (index === 2) {
+      return (
+        <div className="flex items-center justify-center">
+          <Medal className="w-6 h-6 text-orange-400 drop-shadow-glow" />
+        </div>
+      );
+    }
+    return <span className="font-mono text-zinc-400">{index + 1}</span>;
+  };
+
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 sm:p-8">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
-        Leaderboard
-      </h1>
+    <div className="flex flex-col items-center min-h-screen p-4 sm:p-8">
+      {/* Header */}
+      <div className="w-full max-w-7xl mb-8">
+        <h1 className="text-4xl sm:text-5xl font-mono font-bold text-white mb-2">
+          <span className="bg-gradient-to-r from-matrix-100 via-matrix-200 to-emerald-400 bg-clip-text text-transparent">
+            Leaderboard
+          </span>
+        </h1>
+        <p className="text-zinc-400 text-sm sm:text-base">
+          Track your competitive programming progress
+        </p>
+      </div>
 
       {/* Tabs */}
-      <div className="flex space-x-2 sm:space-x-4 mb-6">
+      <div className="flex flex-wrap gap-2 sm:gap-4 mb-8">
         <button
           onClick={() => setActiveTab("all")}
-          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "all"
-              ? "bg-teal-500 text-white shadow-md"
-              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          className={`px-6 py-3 rounded-lg font-mono font-medium transition-all duration-300 ${activeTab === "all"
+              ? "bg-matrix-200 text-black shadow-glow-md"
+              : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
             }`}
         >
           All Members
         </button>
         <button
           onClick={() => setActiveTab("club")}
-          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "club"
-              ? "bg-teal-500 text-white shadow-md"
-              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          className={`px-6 py-3 rounded-lg font-mono font-medium transition-all duration-300 ${activeTab === "club"
+              ? "bg-matrix-200 text-black shadow-glow-md"
+              : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
             }`}
         >
           CP Club Members
         </button>
         <button
           onClick={() => setActiveTab("nonclub")}
-          className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === "nonclub"
-              ? "bg-teal-500 text-white shadow-md"
-              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          className={`px-6 py-3 rounded-lg font-mono font-medium transition-all duration-300 ${activeTab === "nonclub"
+              ? "bg-matrix-200 text-black shadow-glow-md"
+              : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
             }`}
         >
           Non-CP Club Members
         </button>
       </div>
 
-      {/* Table */}
-      <div className="w-full overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead>
-            <tr className="bg-teal-500 text-white text-center">
-              <th className="p-2 sm:p-4">Sr No</th>
-              <th className="p-2 sm:p-4">Name</th>
-              <th className="p-2 sm:p-4">Year</th>
-              <th className="p-2 sm:p-4 flex items-center justify-center">
-                <span className="mr-1">Leetcode Rating</span>
-                <button
-                  onClick={() => {
-                    setSortKey(sortKey === "leetCodeRating" ? null : "leetCodeRating");
-                  }}
-                  className="flex items-center"
-                >
-                  {sortKey === "leetCodeRating" ? 
-                    (
-                      <ArrowDown size={16} className="ml-1" />
-                    ) : 
-                    (
-                      <ArrowUp size={16} className="ml-1 opacity-30" />
-                    )
-                  }
-                </button>
-              </th>
-              <th className="p-2 sm:p-4">Codeforces Rating</th>
-              <th className="p-2 sm:p-4">Rank</th>
-              <th className="p-2 sm:p-4 flex items-center justify-center">
-                <span className="mr-1">Last 5 Contests Attendance</span>
-                <button
-                  onClick={() => {
-                    setSortKey(sortKey === "attendance" ? null : "attendance");
-                  }}
-                  className="flex items-center"
-                >
-                  {sortKey === "attendance" ? 
-                    (
-                      <ArrowDown size={16} className="ml-1" />
-                    ) : 
-                    (
-                      <ArrowUp size={16} className="ml-1 opacity-30" />
-                    )
-                  }
-                </button>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((member, index) => (
-              <tr
-                key={index}
-                className="border-b hover:bg-gray-100 text-center"
-              >
-                <td className="p-2 sm:p-4 text-gray-800">{index + 1}</td>
-                <td className="p-2 sm:p-4 text-gray-800">
-                  <div className="flex ml-10">
-                    <Image
-                      width={40}
-                      height={40}
-                      src={member.titlePhoto}
-                      alt={member.name}
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-4"
-                    />
-                    <Link
-                      className="text-sm sm:text-base text-orange-800 hover:underline"
-                      href={`profile/${member.username}`}
+      {/* Table Card */}
+      <div className="w-full max-w-7xl glass-card rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-zinc-900 text-matrix-200 border-b border-white/10">
+                <th className="p-3 sm:p-4 text-left font-mono text-sm">Rank</th>
+                <th className="p-3 sm:p-4 text-left font-mono text-sm">Name</th>
+                <th className="p-3 sm:p-4 text-center font-mono text-sm">Year</th>
+                <th className="p-3 sm:p-4 text-center font-mono text-sm">
+                  <div className="flex items-center justify-center gap-2">
+                    <span>LeetCode</span>
+                    <button
+                      onClick={() => {
+                        setSortKey(sortKey === "leetCodeRating" ? null : "leetCodeRating");
+                      }}
+                      className="flex items-center hover:text-white transition-colors"
                     >
-                      {member.name}
-                    </Link>
-                  </div>
-                </td>
-                <td className="p-2 sm:p-4 text-gray-600">{member.year}</td>
-                <td className="p-2 sm:p-4 text-blue-600">
-                  <a
-                    href={`https://leetcode.com/${member.lc_username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline text-sm sm:text-base text-orange-800"
-                  >
-                    {member.leetCodeRating}
-                  </a>
-                </td>
-                <td className="p-2 sm:p-4 text-blue-600">
-                  <a
-                    href={`https://codeforces.com/profile/${member.cf_username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline text-sm sm:text-base"
-                  >
-                    {member.rating}
-                  </a>
-                </td>
-                <td className={`p-2 sm:p-4 capitalize ${member.rankColor}`}>
-                  {member.rank}
-                </td>
-                <td className="p-2 sm:p-4 flex space-x-2 items-center justify-center">
-                  {attendanceMap[member.cf_username]?.map((attended, i) => (
-                    <span key={i} className="p-1">
-                      {attended ? (
-                        <CircleCheck size={20} className="text-green-500" />
+                      {sortKey === "leetCodeRating" ? (
+                        <ArrowDown size={16} />
                       ) : (
-                        <CircleX size={20} className="text-red-500" />
+                        <ArrowUp size={16} className="opacity-30" />
                       )}
-                    </span>
-                  ))}
-                </td>
+                    </button>
+                  </div>
+                </th>
+                <th className="p-3 sm:p-4 text-center font-mono text-sm">CF Rating</th>
+                <th className="p-3 sm:p-4 text-center font-mono text-sm">CF Rank</th>
+                <th className="p-3 sm:p-4 text-center font-mono text-sm">
+                  <div className="flex items-center justify-center gap-2">
+                    <span>Last 5</span>
+                    <button
+                      onClick={() => {
+                        setSortKey(sortKey === "attendance" ? null : "attendance");
+                      }}
+                      className="flex items-center hover:text-white transition-colors"
+                    >
+                      {sortKey === "attendance" ? (
+                        <ArrowDown size={16} />
+                      ) : (
+                        <ArrowUp size={16} className="opacity-30" />
+                      )}
+                    </button>
+                  </div>
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredData.map((member, index) => (
+                <tr
+                  key={index}
+                  className={`border-b border-white/5 transition-all duration-300 hover:scale-[1.01] hover:border-matrix-200/40 hover:shadow-glow-sm group ${index % 2 === 0 ? "bg-black/30" : "bg-zinc-900/30"
+                    }`}
+                >
+                  {/* Rank Column with Medals */}
+                  <td className="p-3 sm:p-4 text-center">
+                    {renderRank(index)}
+                  </td>
+
+                  {/* Name Column with Avatar */}
+                  <td className="p-3 sm:p-4">
+                    <div className="flex items-center gap-3">
+                      <Image
+                        width={40}
+                        height={40}
+                        src={member.titlePhoto}
+                        alt={member.name}
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full ring-2 ring-green-500 ring-offset-2 ring-offset-black"
+                      />
+                      <Link
+                        className="text-sm sm:text-base text-zinc-300 hover:text-matrix-200 transition-colors font-medium"
+                        href={`profile/${member.username}`}
+                      >
+                        {member.name}
+                      </Link>
+                    </div>
+                  </td>
+
+                  {/* Year */}
+                  <td className="p-3 sm:p-4 text-center text-zinc-400 text-sm sm:text-base">
+                    {member.year}
+                  </td>
+
+                  {/* LeetCode Rating */}
+                  <td className="p-3 sm:p-4 text-center">
+                    <a
+                      href={`https://leetcode.com/${member.lc_username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm sm:text-base text-matrix-200 hover:text-matrix-100 transition-colors font-mono"
+                    >
+                      {member.leetCodeRating}
+                    </a>
+                  </td>
+
+                  {/* Codeforces Rating */}
+                  <td className="p-3 sm:p-4 text-center">
+                    <a
+                      href={`https://codeforces.com/profile/${member.cf_username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm sm:text-base text-matrix-200 hover:text-matrix-100 transition-colors font-mono"
+                    >
+                      {member.rating}
+                    </a>
+                  </td>
+
+                  {/* Rank Badge */}
+                  <td className="p-3 sm:p-4 text-center">
+                    <span
+                      className={`inline-block px-3 py-1 rounded-md text-xs sm:text-sm font-mono font-bold capitalize ${member.rankColor}`}
+                    >
+                      {member.rank}
+                    </span>
+                  </td>
+
+                  {/* Attendance */}
+                  <td className="p-3 sm:p-4">
+                    <div className="flex gap-2 items-center justify-center">
+                      {attendanceMap[member.cf_username]?.map((attended, i) => (
+                        <span key={i}>
+                          {attended ? (
+                            <CircleCheck size={18} className="text-green-500" />
+                          ) : (
+                            <CircleX size={18} className="text-red-500/50" />
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

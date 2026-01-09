@@ -3,17 +3,17 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
-const ProfileContestTable = ({data}) => {
+const ProfileContestTable = ({ data }) => {
   const [contests, setContests] = useState([]);
-  useEffect(()=>{
+  useEffect(() => {
     setContests(data.mergedContests);
-  },[data])
+  }, [data])
 
   const sortedContests = contests.sort((a, b) => b.startTime - a.startTime);
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString(); 
+    return date.toLocaleDateString();
   };
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,35 +48,39 @@ const ProfileContestTable = ({data}) => {
     <div>
       {!contests || contests.length !== 0 ? (
         <>
-          <table className="w-full text-left border-separate border-spacing-2">
+          <table className="w-full text-left border-separate border-spacing-0">
             <thead>
-              <tr className="text-slate-500">
-                <th className="p-2 text-sm font-medium">Contest</th>
-                <th className="p-2 text-sm font-medium">Date</th>
-                <th className="p-2 text-sm font-medium">Rank</th>
-                <th className="p-2 text-sm font-medium">Solved</th>
+              <tr className="bg-zinc-900 border-b border-white/10">
+                <th className="p-3 text-sm font-mono font-medium text-matrix-200">Contest</th>
+                <th className="p-3 text-sm font-mono font-medium text-matrix-200">Date</th>
+                <th className="p-3 text-sm font-mono font-medium text-matrix-200">Rank</th>
+                <th className="p-3 text-sm font-mono font-medium text-matrix-200">Solved</th>
               </tr>
             </thead>
             <tbody>
               {currentContests.map((contest, index) => (
-                <tr key={index}>
-                  <td className="py-4 text-sm text-gray-700 underline">
-                    <div className="flex gap-2">
+                <tr
+                  key={index}
+                  className={`border-b border-white/5 transition-all hover:bg-zinc-800/30 ${index % 2 === 0 ? "bg-black/20" : "bg-zinc-900/20"
+                    }`}
+                >
+                  <td className="py-3 px-3 text-sm">
+                    <div className="flex gap-2 items-center">
                       {contest.platform === "LeetCode" ? (
                         <Image
                           src="/svgs/lc.svg"
-                          width={0}
-                          height={0}
+                          width={20}
+                          height={20}
                           className="w-5 h-5"
-                          alt="abcd"
+                          alt="LeetCode"
                         />
                       ) : (
                         <Image
                           src="/svgs/cf.svg"
-                          width={0}
-                          height={0}
+                          width={20}
+                          height={20}
                           className="w-5 h-5"
-                          alt="abcd"
+                          alt="Codeforces"
                         />
                       )}
                       {contest.platform === "LeetCode" ? (
@@ -84,25 +88,27 @@ const ProfileContestTable = ({data}) => {
                           href={`https://leetcode.com/contest/${formatContestName(contest.contestName)}`}
                           target="_blank"
                           rel="noreferrer"
+                          className="text-zinc-300 hover:text-matrix-200 transition-colors"
                         >
-                          <p>{contest.contestName} </p>
+                          <p>{contest.contestName}</p>
                         </Link>
                       ) : (
                         <Link
                           href={`https://codeforces.com/contest/${contest.contestId}`}
                           target="_blank"
                           rel="noreferrer"
+                          className="text-zinc-300 hover:text-matrix-200 transition-colors"
                         >
-                          <p>{contest.contestName} </p>
+                          <p>{contest.contestName}</p>
                         </Link>
                       )}
                     </div>
                   </td>
-                  <td className="py-4 text-sm text-gray-700">
+                  <td className="py-3 px-3 text-sm text-zinc-400 font-mono">
                     {formatDate(contest.startTime)}
                   </td>
-                  <td className="py-4 text-sm text-gray-700">{contest.rank}</td>
-                  <td className="py-4 text-sm text-gray-700">
+                  <td className="py-3 px-3 text-sm text-zinc-400 font-mono">{contest.rank}</td>
+                  <td className="py-3 px-3 text-sm text-matrix-200 font-mono font-bold">
                     {contest.problemsSolved ?? 0}
                   </td>
                 </tr>
@@ -114,27 +120,27 @@ const ProfileContestTable = ({data}) => {
             <button
               onClick={handlePreviousPage}
               disabled={currentPage === 1}
-              className="px-4 py-2 text-sm bg-gray-200 rounded disabled:opacity-50"
+              className="px-4 py-2 text-sm font-mono bg-zinc-900/50 border border-white/10 rounded-lg text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
-              Previous
+              ← Previous
             </button>
 
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-zinc-400 font-mono">
               Page {currentPage} of {totalPages}
             </span>
 
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 text-sm bg-gray-200 rounded disabled:opacity-50"
+              className="px-4 py-2 text-sm font-mono bg-zinc-900/50 border border-white/10 rounded-lg text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
-              Next
+              Next →
             </button>
           </div>
         </>
       ) : (
-        <div>
-          <p>No Records Found</p>
+        <div className="text-center py-8">
+          <p className="text-zinc-400 font-mono">No Records Found</p>
         </div>
       )}
     </div>
