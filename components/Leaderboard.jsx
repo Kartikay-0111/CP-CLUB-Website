@@ -115,7 +115,7 @@ const Leaderboard = () => {
     const lastFiveContests = await fetchLastFiveContests();
 
     try {
-      const attendanceMap = validHandles.reduce((acc, handle) => {
+      const attendanceMap = handles.reduce((acc, handle) => {
         acc[handle] = [false, false, false, false, false];
         return acc;
       }, {});
@@ -139,6 +139,7 @@ const Leaderboard = () => {
       }
 
       setAttendanceMap(attendanceMap);
+      // console.log("Attendance Map:", attendanceMap);
 
       const cfRatings = await fetchUserRatings(validHandles);
       const updatedMembers = [];
@@ -164,13 +165,13 @@ const Leaderboard = () => {
           leetCodeRating:
             leetCodeRating.find((item) => item.username === data.lc_username)
               ?.rating || 0,
-          attendance: attendanceMap[data.cf_username] || [
+          attendance: attendanceMap[data.cf_username] === undefined ? [
             false,
             false,
             false,
             false,
             false,
-          ],
+          ] : attendanceMap[data.cf_username],
         };
 
         updatedMembers.push(memberData);
@@ -220,14 +221,22 @@ const Leaderboard = () => {
       if (sortKey == "leetCodeRating") {
         cachedData.data.sort((a, b) => b.leetCodeRating - a.leetCodeRating);
       }
-      else if (sortKey == "attendance") {
+      else if (sortKey === "attendance") {
         cachedData.data.sort((a, b) => {
-          const aAttendance = cachedData.attendanceMap[a.cf_username].filter(Boolean).length;
-          const bAttendance = cachedData.attendanceMap[b.cf_username].filter(Boolean).length;
+          const aAttendance = a.attendance.reduce(
+            (acc, val) => acc + (val ? 1 : 0),
+            0
+          );
+
+          const bAttendance = b.attendance.reduce(
+            (acc, val) => acc + (val ? 1 : 0),
+            0
+          );
+
           return bAttendance - aAttendance;
-        }
-        );
+        });
       }
+
       setLeaderboardData(cachedData.data);
       setAttendanceMap(cachedData.attendanceMap);
       setLoading(false);
@@ -309,8 +318,8 @@ const Leaderboard = () => {
         <button
           onClick={() => setActiveTab("all")}
           className={`px-6 py-3 rounded-lg font-mono font-medium transition-all duration-300 ${activeTab === "all"
-              ? "bg-matrix-200 text-black shadow-glow-md"
-              : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
+            ? "bg-matrix-200 text-black shadow-glow-md"
+            : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
             }`}
         >
           All Members
@@ -318,8 +327,8 @@ const Leaderboard = () => {
         <button
           onClick={() => setActiveTab("club")}
           className={`px-6 py-3 rounded-lg font-mono font-medium transition-all duration-300 ${activeTab === "club"
-              ? "bg-matrix-200 text-black shadow-glow-md"
-              : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
+            ? "bg-matrix-200 text-black shadow-glow-md"
+            : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
             }`}
         >
           CP Club Members
@@ -327,8 +336,8 @@ const Leaderboard = () => {
         <button
           onClick={() => setActiveTab("nonclub")}
           className={`px-6 py-3 rounded-lg font-mono font-medium transition-all duration-300 ${activeTab === "nonclub"
-              ? "bg-matrix-200 text-black shadow-glow-md"
-              : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
+            ? "bg-matrix-200 text-black shadow-glow-md"
+            : "glass border border-white/10 text-zinc-300 hover:border-matrix-200/40 hover:text-matrix-200"
             }`}
         >
           Non-CP Club Members
