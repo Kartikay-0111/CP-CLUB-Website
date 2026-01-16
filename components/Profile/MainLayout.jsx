@@ -113,13 +113,13 @@ function MainLayout({ data }) {
   let totalQuestion = data.leetCodeData?.acSubmissionNum[0]?.count;
   let calenderSubmission = data.leetCodeData?.submissionCalendar;
 
-  console.log(calenderSubmission);
-  
+  // console.log(calenderSubmission);
+
   const topicWiseAnalysis = mergeTopicData(
     data.leetCodeData?.topicWiseAnalysis,
     data.codeForcesData?.topicAnalysis
   );
-  
+
   const averageContestRating = getAverageContestRating(
     data.codeForcesData?.ratingData
   );
@@ -163,7 +163,7 @@ function MainLayout({ data }) {
     heatmapData,
     dailySolvedProblem
   );
-  console.log(mergedData);
+  // console.log(mergedData);
 
   const leetContestSolvedSum = (
     data.leetCodeData?.userContestDetails?.contestParticipation ?? []
@@ -189,7 +189,7 @@ function MainLayout({ data }) {
   ];
   // console.log(data.codeForcesData);
 
-  
+
   const totalSubmissions =
     (data.leetCodeData?.acSubmissionNum[0]?.count ?? 0) +
     (data.codeForcesData?.problemsSolvedCount ?? 0);
@@ -201,44 +201,44 @@ function MainLayout({ data }) {
         {topData.map((data, index) => (
           <div
             key={index}
-            className="w-full py-5 px-7 rounded-xl shadow-custom flex items-center gap-5 bg-white"
+            className="w-full py-6 px-7 rounded-xl glass-card flex items-center gap-5"
           >
-            <div className="bg-[#F5F6FE] rounded-full w-14 h-14 flex justify-center items-center">
+            <div className="bg-matrix-200/10 border border-matrix-200/20 rounded-full w-14 h-14 flex justify-center items-center shadow-glow-sm">
               <Image
                 src={data.image}
                 alt={data.title}
-                width={0}
-                height={0}
-                className="w-6 h-6"
+                width={24}
+                height={24}
+                className="w-6 h-6 brightness-150"
               />
             </div>
             <div>
-              <p>{data.title}</p>
-              <p className="text-3xl">{data.count}</p>
+              <p className="text-zinc-400 text-sm font-medium">{data.title}</p>
+              <p className="text-3xl font-mono font-bold text-matrix-200">{data.count}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex gap-7">
+      <div className="flex flex-row gap-7">
         {/* left part */}
-        <div className="w-full flex-1 flex flex-col gap-7">
-          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <div className="flex gap-4 border-b">
+        <div className="w-full basis-1/3 flex flex-col gap-7">
+          <div className="w-full py-6 px-7 rounded-xl glass-card flex flex-col gap-5">
+            <div className="flex gap-4 border-b border-white/10">
               <button
                 onClick={() => setActiveTab('leetcode')}
-                className={`pb-2 px-4 ${activeTab === 'leetcode'
-                    ? 'border-b-2 border-blue-500 text-blue-500'
-                    : 'text-gray-500'
+                className={`pb-3 px-4 font-mono font-medium transition-all ${activeTab === 'leetcode'
+                    ? 'border-b-2 border-matrix-200 text-matrix-200'
+                    : 'text-zinc-400 hover:text-zinc-300'
                   }`}
               >
                 LeetCode
               </button>
               <button
                 onClick={() => setActiveTab('codeforces')}
-                className={`pb-2 px-4 ${activeTab === 'codeforces'
-                    ? 'border-b-2 border-blue-500 text-blue-500'
-                    : 'text-gray-500'
+                className={`pb-3 px-4 font-mono font-medium transition-all ${activeTab === 'codeforces'
+                    ? 'border-b-2 border-matrix-200 text-matrix-200'
+                    : 'text-zinc-400 hover:text-zinc-300'
                   }`}
               >
                 CodeForces
@@ -247,14 +247,20 @@ function MainLayout({ data }) {
 
             {activeTab === 'leetcode' ? (
               <>
-                <p>Problems solved from leetcode</p>
+                <p className="text-white font-mono text-sm flex items-center gap-2">
+                  <span className="w-1 h-4 bg-matrix-200" />
+                  Problems solved from leetcode
+                </p>
                 <div className="flex gap-3">
                   <DoughnutChart data={data.leetCodeData?.acSubmissionNum} />
                 </div>
               </>
             ) : (
               <>
-                <p>Problems solved from codeforces</p>
+                <p className="text-white font-mono text-sm flex items-center gap-2">
+                  <span className="w-1 h-4 bg-matrix-200" />
+                  Problems solved from codeforces
+                </p>
                 <div className="flex gap-3">
                   <DoughnutChart data={data.codeForcesData?.topicAnalysis} />
                 </div>
@@ -262,11 +268,14 @@ function MainLayout({ data }) {
             )}
           </div>
 
-          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <div className="flex justify-between">
-              <p>Contests</p>
-              <Link href="/contest" className="text-sm cursor-pointer">
-                See All
+          <div className="w-full py-6 px-7 rounded-xl glass-card flex flex-col gap-5">
+            <div className="flex justify-between items-center">
+              <p className="text-white font-mono text-sm flex items-center gap-2">
+                <span className="w-1 h-4 bg-matrix-200" />
+                Contests
+              </p>
+              <Link href="/contest" className="text-sm text-matrix-200 hover:text-matrix-100 cursor-pointer font-mono transition-colors">
+                See All →
               </Link>
             </div>
             <ProfileContestTable data={data} />
@@ -274,18 +283,21 @@ function MainLayout({ data }) {
         </div>
 
         {/* right part */}
-        <div className="w-full flex flex-col gap-7 flex-1">
+        <div className="w-full basis-2/3 flex flex-col gap-7">
           {/* Heat map section */}
           <ActivityHeatmap heatMapData={mergedData} />
 
           {/* Rating chart section */}
-          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
+          <div className="w-full py-6 px-7 rounded-xl glass-card flex flex-col gap-5">
             <RatingChart data={data} />
           </div>
 
           {/* Topic Analysis section */}
-          <div className="w-full py-5 px-7 rounded-xl shadow-custom flex flex-col gap-5 bg-white">
-            <p>Topic Wise Analysis</p>
+          <div className="w-full py-6 px-7 rounded-xl glass-card flex flex-col gap-5">
+            <p className="text-white font-mono text-sm flex items-center gap-2">
+              <span className="w-1 h-4 bg-matrix-200" />
+              Topic Wise Analysis
+            </p>
             <TopicAnalysis data={topicWiseAnalysis} />
           </div>
         </div>

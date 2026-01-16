@@ -35,7 +35,7 @@ async function page({ params }) {
   data["mergedContests"] = mergedContestsArray;
   data["contestsData"] = contestsData;
 
-  console.log(data);
+  // console.log(data);
   
   return (
     <div>

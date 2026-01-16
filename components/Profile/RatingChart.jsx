@@ -43,18 +43,18 @@ const RatingChart = ({ data }) => {
   };
 
   useEffect(() => {
-    console.log(chartRef.current);
+    // console.log(chartRef.current);
 
     if (lcRatings.length > 0 || cfRatings.length > 0) {
       const ctx = chartRef.current.getContext("2d");
 
       const lcGradient = ctx.createLinearGradient(0, 0, 0, 400);
-      lcGradient.addColorStop(0, "rgba(121, 178, 250, 0.7)");
-      lcGradient.addColorStop(1, "rgba(121, 178, 250, 0)");
+      lcGradient.addColorStop(0, "rgba(34, 197, 94, 0.7)");
+      lcGradient.addColorStop(1, "rgba(34, 197, 94, 0)");
 
       const cfGradient = ctx.createLinearGradient(0, 0, 0, 400);
-      cfGradient.addColorStop(0, "rgba(255, 99, 132, 0.7)");
-      cfGradient.addColorStop(1, "rgba(255, 99, 132, 0)");
+      cfGradient.addColorStop(0, "rgba(16, 185, 129, 0.7)");
+      cfGradient.addColorStop(1, "rgba(16, 185, 129, 0)");
 
       const labels = lcDates.length > cfDates.length ? lcDates : cfDates;
 
@@ -64,18 +64,18 @@ const RatingChart = ({ data }) => {
           lcRatings.length > 0 && {
             label: "LeetCode Rating",
             data: lcRatings,
-            // fill: true,
+            fill: true,
             backgroundColor: lcGradient,
-            borderColor: "rgba(121, 178, 250, 1)",
+            borderColor: "rgba(34, 197, 94, 1)",
             borderWidth: 2,
             tension: 0.4,
           },
           cfRatings.length > 0 && {
             label: "Codeforces Rating",
             data: cfRatings,
-            // fill: true,
+            fill: true,
             backgroundColor: cfGradient,
-            borderColor: "rgba(255, 99, 132, 1)",
+            borderColor: "rgba(16, 185, 129, 1)",
             borderWidth: 2,
             tension: 0.4,
           },
@@ -94,6 +94,13 @@ const RatingChart = ({ data }) => {
           },
           legend: {
             display: true,
+            labels: {
+              color: "#22c55e",
+              font: {
+                family: "ui-monospace, monospace",
+                size: 12,
+              },
+            },
           },
         },
         scales: {
@@ -101,23 +108,38 @@ const RatingChart = ({ data }) => {
             display: false,
           },
           y: {
-            title: { display: true, text: "Rating" },
+            title: {
+              display: true,
+              text: "Rating",
+              color: "#71717a",
+              font: {
+                family: "ui-monospace, monospace",
+                size: 12,
+              },
+            },
+            ticks: {
+              color: "#71717a",
+              font: {
+                family: "ui-monospace, monospace",
+              },
+            },
+            grid: {
+              color: "rgba(255, 255, 255, 0.05)",
+            },
             min:
               Math.min(
                 ...lcRatings.concat(cfRatings).filter((v) => v != null)
               ) ===
-              Math.max(...lcRatings.concat(cfRatings).filter((v) => v != null))
+                Math.max(...lcRatings.concat(cfRatings).filter((v) => v != null))
                 ? 0
                 : Math.min(
-                    ...lcRatings.concat(cfRatings).filter((v) => v != null)
-                  ),
+                  ...lcRatings.concat(cfRatings).filter((v) => v != null)
+                ),
             max:
               Math.max(
                 ...lcRatings.concat(cfRatings).filter((v) => v != null)
               ) + 300,
-            ticks: {
-              stepSize: 50,
-            },
+
           },
         },
       };
@@ -144,8 +166,11 @@ const RatingChart = ({ data }) => {
       }}
     >
       <div>
-        <p className="text-sm">Contests Rating</p>
-        <p className="text-gray-500 mt-2">
+        <p className="text-sm font-mono text-white font-semibold flex items-center gap-2">
+          <span className="w-1 h-4 bg-matrix-200" />
+          Contests Rating
+        </p>
+        <p className="text-zinc-500 mt-2 font-mono text-xs">
           {data.contestsData?.leetCodeContestsData?.length === 0 &&
             data.contestsData?.codeForcesContestsData?.length === 0 &&
             "No Contests Data"}
@@ -153,10 +178,10 @@ const RatingChart = ({ data }) => {
       </div>
       {(data.contestsData?.leetCodeContestsData?.length > 0 ||
         data.contestsData?.codeForcesContestsData?.length > 0) && (
-        <div style={{ width: "100%" }}>
-          <canvas ref={chartRef}></canvas>
-        </div>
-      )}
+          <div style={{ width: "100%" }}>
+            <canvas ref={chartRef}></canvas>
+          </div>
+        )}
     </div>
   );
 };

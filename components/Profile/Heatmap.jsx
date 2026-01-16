@@ -31,6 +31,7 @@ const ActivityHeatmap = ({ heatMapData }) => {
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
+
     // Dynamic color strength based on dataset
     const maxCount = Math.max(...heatMapData.map((d) => d.count), 1);
 
@@ -38,7 +39,7 @@ const ActivityHeatmap = ({ heatMapData }) => {
         if (!count || count === 0) return 0;
         // ratio from 0..1
         const ratio = count / maxCount;
-        const level = Math.ceil(ratio * 40);
+        const level = Math.ceil(ratio * 4);
         return Math.min(Math.max(level, 1), 4);
     };
 
@@ -76,44 +77,45 @@ const ActivityHeatmap = ({ heatMapData }) => {
     };
 
     return (
-        <div className="w-full py-5 px-7 rounded-xl shadow-lg bg-white">
+        <div className="w-full py-6 px-7 rounded-xl glass-card">
             <style>{`
         .react-calendar-heatmap text {
-          font-size: 12px;
-          fill: #6B7280;
+          font-size: 11px;
+          fill: #71717a;
+          font-family: ui-monospace, monospace;
         }
 
         .react-calendar-heatmap .color-empty {
-          fill: #F3F4F6;
+          fill: #18181b;
         }
 
         .react-calendar-heatmap .color-scale-1 {
-          fill: #A7F3D0;
+          fill: #134e4a;
         }
 
         .react-calendar-heatmap .color-scale-2 {
-          fill: #6EE7B7;
+          fill: #14532d;
         }
 
         .react-calendar-heatmap .color-scale-3 {
-          fill: #34D399;
+          fill: #15803d;
         }
 
         .react-calendar-heatmap .color-scale-4 {
-          fill: #10B981;
+          fill: #22c55e;
         }
 
         .react-calendar-heatmap rect {
           rx: 2;
-          stroke: #E5E7EB;
+          stroke: #27272a;
           stroke-width: 1;
           transition: all 0.2s ease;
         }
 
         .react-calendar-heatmap rect:hover {
-          stroke: #10B981;
+          stroke: #22c55e;
           stroke-width: 2;
-          opacity: 0.8;
+          opacity: 0.9;
         }
       `}</style>
 
@@ -121,11 +123,16 @@ const ActivityHeatmap = ({ heatMapData }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-semibold text-gray-800">Activity Heatmap</h3>
-                        <span className="text-sm text-slate-500">{totalSubmissions} submissions</span>
+                        <div className="flex items-center gap-2">
+                            <span className="w-1 h-6 bg-matrix-200" />
+                            <h3 className="text-lg font-semibold text-white font-mono">Activity Heatmap</h3>
+                        </div>
+                        <span className="text-sm text-zinc-400 font-mono">
+                            {totalSubmissions} submissions
+                        </span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-zinc-400 font-mono">
                             {startDate.getFullYear() === endDate.getFullYear()
                                 ? endDate.getFullYear()
                                 : `${startDate.getFullYear()} - ${endDate.getFullYear()}`}
@@ -133,14 +140,14 @@ const ActivityHeatmap = ({ heatMapData }) => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={handlePrevious}
-                                className="p-1.5 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                                className="p-1.5 rounded-lg text-zinc-400 hover:text-matrix-200 hover:bg-zinc-800/50 transition-all"
                                 title="Previous period"
                             >
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={handleNext}
-                                className="p-1.5 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                className="p-1.5 rounded-lg text-zinc-400 hover:text-matrix-200 hover:bg-zinc-800/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400"
                                 disabled={timeOffset === 0}
                                 title="Next period"
                             >
@@ -151,7 +158,7 @@ const ActivityHeatmap = ({ heatMapData }) => {
                 </div>
 
                 {/* Heatmap */}
-                <div className="w-full overflow-x-auto">
+                <div className="w-full overflow-x-auto bg-black/30 p-4 rounded-lg border border-white/10">
                     <CalendarHeatmap
                         startDate={startDate}
                         endDate={endDate}
@@ -171,14 +178,14 @@ const ActivityHeatmap = ({ heatMapData }) => {
                 </div>
 
                 {/* Legend */}
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-xs text-zinc-500 font-mono">
                     <span>Less</span>
                     <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded-sm bg-gray-100 border border-gray-200"></div>
-                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#A7F3D0' }}></div>
-                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#6EE7B7' }}></div>
-                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#34D399' }}></div>
-                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#10B981' }}></div>
+                        <div className="w-3 h-3 rounded-sm bg-zinc-900 border border-zinc-700"></div>
+                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#134e4a' }}></div>
+                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#14532d' }}></div>
+                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#15803d' }}></div>
+                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#22c55e' }}></div>
                     </div>
                     <span>More</span>
                 </div>
@@ -186,17 +193,20 @@ const ActivityHeatmap = ({ heatMapData }) => {
                 <Tooltip
                     id="heatmap-tooltip"
                     style={{
-                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                        color: '#fff',
+                        backgroundColor: 'rgba(24, 24, 27, 0.98)',
+                        color: '#22c55e',
                         borderRadius: '8px',
                         padding: '8px 12px',
-                        fontSize: '13px',
-                        fontWeight: '500',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        fontFamily: 'ui-monospace, monospace',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                        border: '1px solid rgba(34, 197, 94, 0.2)',
                     }}
                 />
             </div>
         </div>
     );
 };
+
 export default ActivityHeatmap;
